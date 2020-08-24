@@ -40,11 +40,12 @@ void UART_Deinit(UART_t * uart);
 
 void UART_Tx(UART_t * uart, uint8_t * data, uint16_t count);
 void UART_TxStr(UART_t * uart, char * str);
+void UART_TxFlush(UART_t * uart);
 
 uint16_t UART_RxCount(UART_t * uart);
 uint16_t UART_Rx(UART_t * uart, uint8_t * data, uint16_t count);
-uint8_t UART_Pop(UART_t * uart);
-void UART_RxClear(UART_t * uart);
+uint8_t UART_RxPop(UART_t * uart);
+void UART_RxFlush(UART_t * uart);
 
 /*
  * EXTERN DECLARATIONS

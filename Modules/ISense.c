@@ -1,5 +1,7 @@
 
 #include "ISense.h"
+
+#ifdef ISENSE_COUNT
 #include "ADC.h"
 
 /*
@@ -82,3 +84,5 @@ static uint16_t ISENSE_GetCurrent(uint32_t ain)
 /*
  * INTERRUPT ROUTINES
  */
+
+#endif // ISENSE_COUNT

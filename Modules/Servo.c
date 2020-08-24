@@ -1,5 +1,8 @@
 
 #include "Servo.h"
+
+#ifdef SERVO_COUNT
+
 #include "TIM.h"
 #include "LED.h"
 #include "GPIO.h"
@@ -124,6 +127,11 @@ void SERVO_Update(State_t state)
 	else if (gServoState.running)
 	{
 		SERVO_Stop();
+
+		for (uint8_t s = 0; s < SERVO_COUNT; s++)
+		{
+			gServos[s].pulse = 0;
+		}
 	}
 }
 
@@ -206,3 +214,5 @@ static void SERVO_ISR_P4(void)
 	uint8_t s = gServoState.index + 3;
 	GPIO_RESET(gServos[s].gpio, gServos[s].pin);
 }
+
+#endif //SERVO_COUNT

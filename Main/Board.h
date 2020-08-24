@@ -12,6 +12,7 @@ extern "C" {
 
 //#define BRD_PI
 #define BRD_SERVO
+//#define BRD_PWR
 
 #define CORE_USE_HSE
 
@@ -20,6 +21,7 @@ extern "C" {
 #define LED_PIN_GRN		GPIO_PIN_0
 #define LED_PIN_BLU 	GPIO_PIN_2
 
+#define SER_UART		UART_2
 #define UART2_GPIO 		GPIOA
 #define UART2_PINS		(GPIO_PIN_2 | GPIO_PIN_3)
 
@@ -39,7 +41,9 @@ extern "C" {
 #ifdef BRD_MOTOR
 #include "Boards/Motor/BoardMotor.h"
 #endif
-
+#ifdef BRD_PWR
+#include "Boards/Pwr/BoardPwr.h"
+#endif
 
 
 #ifdef __cplusplus

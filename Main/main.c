@@ -6,7 +6,10 @@
 #include "ADC.h"
 #include "NTC.h"
 #include "Button.h"
-#include "CAN.h"
+#include "Comms.h"
+#include "Error.h"
+#include "Config.h"
+#include "Serial.h"
 
 #ifdef USE_PSU
 #include "PSU.h"
@@ -38,13 +41,17 @@ int main(void)
 {
 
 	CORE_Init();
+	CFG_Load();
+
+	//gCfg.address = 3;
+	//CFG_Save();
 
 	LED_Init();
 	LED_Set(LED_RED);
 	UART_Init(UART_2, 115200);
-	CAN_Init();
 	ADC_Init();
 
+	ERR_Init();
 #ifdef USE_PSU
 	PSU_Init();
 #endif
@@ -54,13 +61,14 @@ int main(void)
 #ifdef USE_ISENSE
 	ISENSE_Init();
 #endif
+	COMMS_Init();
+	SER_Init();
 
 	while (1)
 	{
-		uint32_t now = HAL_GetTick();
+		State_t state = State_Update();
 
-		State_t state = State_Active;
-
+		COMMS_Update(state);
 #ifdef USE_PSU
 		PSU_Update(state);
 #endif
@@ -70,9 +78,16 @@ int main(void)
 #ifdef USE_ISENSE
 		ISENSE_Update(state);
 #endif
+		ERR_Update(state);
+		SER_Update(state);
 
+		if (ERR_Get())
+		{
+			State_Req(State_Error);
+		}
 
 		/*
+		uint32_t now = HAL_GetTick();
 		static uint32_t tide = 0;
 		if (now - tide > 250)
 		{
@@ -84,7 +99,6 @@ int main(void)
 		}
 		int16_t temp = NTC_10K(ADC_Read( NTC_AIN ));
 		*/
-
 		LED_Set( MAIN_StatusColor(state) );
 
 		CORE_Idle();

@@ -1,8 +1,8 @@
 #ifndef SERVO_H
 #define SERVO_H
 
+#include "State.h"
 #include "Board.h"
-#include "Module.h"
 
 /*
  * PUBLIC DEFINITIONS

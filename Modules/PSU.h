@@ -1,8 +1,8 @@
 #ifndef PSU_H
 #define PSU_H
 
+#include "State.h"
 #include "Board.h"
-#include "Module.h"
 
 /*
  * PUBLIC DEFINITIONS

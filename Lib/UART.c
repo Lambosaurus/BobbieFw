@@ -9,6 +9,12 @@
 
 #define UART_BFR_INCR(v) ((v + 1) & (UART_BFR_SIZE - 1))
 
+#define __UART_RX_ENABLE(uart) 	(uart->Instance->CR1 |= USART_CR1_RXNEIE)
+#define __UART_RX_DISABLE(uart) (uart->Instance->CR1 &= ~USART_CR1_RXNEIE)
+#define __UART_TX_ENABLE(uart) 	(uart->Instance->CR1 |= USART_CR1_TXEIE)
+#define __UART_TX_DISABLE(uart) (uart->Instance->CR1 &= ~USART_CR1_TXEIE)
+
+
 /*
  * PRIVATE TYPES
  */
@@ -67,13 +73,14 @@ void UART_Init(UART_t * uart, uint32_t baud)
 	__HAL_UART_ENABLE(uart);
 
 	// Enable RX IRQ.
-	uart->Instance->CR1 |= USART_CR1_RXNEIE;
+	__UART_RX_ENABLE(uart);
 }
 
 void UART_Deinit(UART_t * uart)
 {
 	// Disable RX IRQ, and TX IRQ in case a tx is underway.
-	uart->Instance->CR1 &= ~(USART_CR1_RXNEIE | USART_CR1_TXEIE);
+	__UART_RX_DISABLE(uart);
+	__UART_TX_DISABLE(uart);
 
 	__HAL_UART_DISABLE(uart);
 	// Clear all control registers.
@@ -110,12 +117,12 @@ void UART_TxStr(UART_t * uart, char * str)
 
 uint16_t UART_RxCount(UART_t * uart)
 {
-	__disable_irq();
+	__UART_RX_DISABLE(uart);
 	// We have to disable the IRQs, as the IRQ may bump the tail.
 	uint16_t count = uart->rx.head >= uart->rx.tail
 				   ? uart->rx.head - uart->rx.tail
 				   : UART_BFR_SIZE + uart->rx.head - uart->rx.tail;
-	__enable_irq();
+	__UART_RX_ENABLE(uart);
 	return count;
 }
 
@@ -127,9 +134,7 @@ uint16_t UART_Rx(UART_t * uart, uint8_t * data, uint16_t count)
 		count = available;
 	}
 
-	// Copy the bytes out with the IRQ disabled the whole time.
-	// This could be done with successive UART_Pop() calls, but this should be a pinch faster.
-	__disable_irq();
+	// As long as we read faster than the tail is nudged, we should be fine.
 	uint16_t tail = uart->rx.tail;
 	for (uint16_t i = 0; i < count; i++)
 	{
@@ -137,25 +142,23 @@ uint16_t UART_Rx(UART_t * uart, uint8_t * data, uint16_t count)
 		tail = UART_BFR_INCR(tail);
 	}
 	uart->rx.tail = tail;
-	__enable_irq();
 
 	return count;
 }
 
-uint8_t UART_Pop(UART_t * uart)
+uint8_t UART_RxPop(UART_t * uart)
 {
-	__disable_irq();
-	uint8_t b = uart->rx.buffer[uart->rx.tail];
-	uart->rx.tail = UART_BFR_INCR(uart->rx.tail);
-	__enable_irq();
+	uint16_t tail = uart->rx.tail;
+	uint8_t b = uart->rx.buffer[tail];
+	uart->rx.tail = UART_BFR_INCR(tail);
 	return b;
 }
 
-void UART_RxClear(UART_t * uart)
+void UART_RxFlush(UART_t * uart)
 {
-	__disable_irq();
+	__UART_RX_DISABLE(uart);
 	uart->rx.tail = uart->rx.head;
-	__enable_irq();
+	__UART_RX_ENABLE(uart);
 }
 
 /*

@@ -1,5 +1,7 @@
 
 #include "PSU.h"
+
+#ifdef USE_PSU
 #include "ADC.h"
 
 /*
@@ -79,3 +81,5 @@ uint32_t PSU_GetVoltage()
 /*
  * INTERRUPT ROUTINES
  */
+
+#endif //USE_PSU

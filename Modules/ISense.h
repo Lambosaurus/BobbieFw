@@ -1,8 +1,8 @@
 #ifndef ISENSE_H
 #define ISENSE_H
 
+#include "State.h"
 #include "Board.h"
-#include "Module.h"
 
 /*
  * PUBLIC DEFINITIONS
