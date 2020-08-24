@@ -106,7 +106,7 @@ void UART_Tx(UART_t * uart, uint8_t * data, uint16_t count)
 		uart->tx.head = head;
 
 		// Enable transmitter - no guarantee it was ever enabled.
-		uart->Instance->CR1 |= USART_CR1_TXEIE;
+		__UART_TX_ENABLE(uart);
 	}
 }
 
@@ -249,7 +249,7 @@ void USART_IRQHandler(UART_t *uart)
 		{
 			// Tail caught up with head: no bytes remain.
 			// Disable the TX IRQ.
-			uart->Instance->CR1 &= ~USART_CR1_TXEIE;
+			__UART_TX_DISABLE(uart);
 		}
 	}
 }

@@ -27,7 +27,6 @@ static void COMMS_EncodeMsg(Msg_t * msg, CANMsg_t * can);
 static void COMMS_DecodeMsg(CANMsg_t * can, Msg_t * msg);
 static bool COMMS_RxMsg(Msg_t * msg);
 static bool COMMS_TxMsg(Msg_t * msg);
-static void COMMS_HandleMsg(Msg_t * msg);
 
 
 /*
@@ -103,11 +102,13 @@ void COMMS_Send(Topic_t topic, uint8_t * data, uint8_t len, uint8_t dest)
 	COMMS_TxMsg(&msg);
 }
 
-/*
- * PRIVATE FUNCTIONS
- */
+void COMMS_SendMsg(Msg_t * msg)
+{
+	COMMS_TxMsg(msg);
+}
 
-static void COMMS_HandleMsg(Msg_t * msg)
+
+void COMMS_HandleMsg(Msg_t * msg)
 {
 	switch (msg->topic)
 	{
@@ -120,6 +121,11 @@ static void COMMS_HandleMsg(Msg_t * msg)
 		break;
 	}
 }
+
+
+/*
+ * PRIVATE FUNCTIONS
+ */
 
 static void COMMS_EncodeMsg(Msg_t * msg, CANMsg_t * can)
 {

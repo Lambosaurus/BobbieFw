@@ -36,5 +36,7 @@ void COMMS_Update(State_t state);
 
 void COMMS_Broadcast(Topic_t topic, uint8_t * data, uint8_t len);
 void COMMS_Send(Topic_t topic, uint8_t * data, uint8_t len, uint8_t dest);
+void COMMS_SendMsg(Msg_t * msg);
+void COMMS_HandleMsg(Msg_t * msg);
 
 #endif //COMMS_H
