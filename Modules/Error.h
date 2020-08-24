@@ -27,5 +27,6 @@ void ERR_Init(void);
 void ERR_Set(Error_t err);
 void ERR_Update(State_t state);
 Error_t ERR_Get(void);
+void ERR_Clear(void);
 
 #endif //CONFIG_H

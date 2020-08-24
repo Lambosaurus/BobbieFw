@@ -42,7 +42,10 @@ void CFG_Save(void)
 void CFG_Default(void)
 {
 	Config_t cfg = {
-		.address = 1
+		.address = 1,
+		.ledAlpha = 0x8,	 // Half power
+		.errorCooldown = 30, // 3s
+		.activeTimeout = 10, // 1s
 	};
 	memcpy(&gCfg, &cfg, sizeof(gCfg));
 }

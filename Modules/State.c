@@ -1,11 +1,10 @@
 
 #include "State.h"
+#include "Config.h"
 
 /*
  * PRIVATE DEFINITIONS
  */
-
-#define ACTIVE_TIMEOUT	1000
 
 /*
  * PRIVATE TYPES
@@ -22,10 +21,7 @@
 static struct {
 	State_t state;
 	uint32_t lastActive;
-} gState = {
-	.state = State_Idle,
-	.lastActive = 0,
-};
+} gState;
 
 /*
  * PUBLIC FUNCTIONS
@@ -35,7 +31,7 @@ State_t State_Update(void)
 {
 	if (gState.state == State_Active)
 	{
-		if ( HAL_GetTick() - gState.lastActive > ACTIVE_TIMEOUT)
+		if ( HAL_GetTick() - gState.lastActive > gCfg.activeTimeout)
 		{
 			gState.state = State_Idle;
 		}
@@ -70,6 +66,11 @@ void State_Req(State_t state)
 		}
 		break;
 	}
+}
+
+void State_Reset(void)
+{
+	gState.state = State_Idle;
 }
 
 /*

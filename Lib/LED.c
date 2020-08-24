@@ -53,11 +53,17 @@ void LED_Deinit(void)
 	HAL_GPIO_DeInit(LED_GPIO, LED_PIN_ALL);
 }
 
-void LED_Set(LEDColor_t color)
+Color_t COLOR_Alpha(Color_t color, uint8_t gain)
 {
-	gColor.b = color & 0xF;
-	gColor.g = (color >> 4) & 0xF;
-	gColor.r = (color >> 8) & 0xF;
+	if (gain > 0x10) { gain = 0x10; }
+	return (color * gain / 0x10) & 0x0F0F0F;
+}
+
+void LED_Set(Color_t color)
+{
+	gColor.b = (color      ) & 0xF;
+	gColor.g = (color >> 8 ) & 0xF;
+	gColor.r = (color >> 16) & 0xF;
 }
 
 void LED_Tick(void)

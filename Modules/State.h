@@ -14,5 +14,6 @@ typedef enum {
 
 void State_Req(State_t state);
 State_t State_Update(void);
+void State_Reset(void);
 
 #endif /* STATE_H */

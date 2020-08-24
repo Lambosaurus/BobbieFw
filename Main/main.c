@@ -21,7 +21,7 @@
 #include "ISense.h"
 #endif
 
-LEDColor_t MAIN_StatusColor(State_t state)
+Color_t MAIN_StatusColor(State_t state)
 {
 	switch (state)
 	{
@@ -43,7 +43,7 @@ int main(void)
 	CORE_Init();
 	CFG_Load();
 
-	//gCfg.address = 3;
+	//CFG_Default();
 	//CFG_Save();
 
 	LED_Init();
@@ -64,6 +64,8 @@ int main(void)
 	COMMS_Init();
 	SER_Init();
 
+	State_Reset();
+
 	while (1)
 	{
 		State_t state = State_Update();
@@ -81,11 +83,6 @@ int main(void)
 		ERR_Update(state);
 		SER_Update(state);
 
-		if (ERR_Get())
-		{
-			State_Req(State_Error);
-		}
-
 		/*
 		uint32_t now = HAL_GetTick();
 		static uint32_t tide = 0;
@@ -99,7 +96,8 @@ int main(void)
 		}
 		int16_t temp = NTC_10K(ADC_Read( NTC_AIN ));
 		*/
-		LED_Set( MAIN_StatusColor(state) );
+
+		LED_Set( COLOR_Alpha( MAIN_StatusColor(state), gCfg.ledAlpha) );
 
 		CORE_Idle();
 	}
