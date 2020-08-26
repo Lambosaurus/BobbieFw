@@ -21,6 +21,8 @@ typedef enum {
 	LED_BLU = 0x00000F,
 } Color_t;
 
+#define COLOR_GAIN_MAX	0x0F
+
 /*
  * PUBLIC FUNCTIONS
  */

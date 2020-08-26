@@ -22,6 +22,7 @@ extern "C" {
 #define LED_PIN_BLU 	GPIO_PIN_2
 
 #define SER_UART		UART_2
+#define SER_USE_BRIDGE
 #define UART2_GPIO 		GPIOA
 #define UART2_PINS		(GPIO_PIN_2 | GPIO_PIN_3)
 
@@ -29,7 +30,6 @@ extern "C" {
 #define CAN_PINS		(GPIO_PIN_8 | GPIO_PIN_9)
 
 #define NTC_AIN  		ADC_CHANNEL_4
-
 
 
 #ifdef BRD_SERVO

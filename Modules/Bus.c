@@ -1,6 +1,6 @@
 
+#include "Bus.h"
 #include "Board.h"
-#include "Comms.h"
 #include "CAN.h"
 #include "Error.h"
 #include "Config.h"
@@ -13,7 +13,6 @@
 #define BUSSTATUS_PERIOD	250
 #define BUSSTATUS_TIMEOUT	550
 
-#define DST_BROADCAST		0
 
 /*
  * PRIVATE TYPES
@@ -23,10 +22,9 @@
  * PRIVATE PROTOTYPES
  */
 
-static void COMMS_EncodeMsg(Msg_t * msg, CANMsg_t * can);
-static void COMMS_DecodeMsg(CANMsg_t * can, Msg_t * msg);
-static bool COMMS_RxMsg(Msg_t * msg);
-static bool COMMS_TxMsg(Msg_t * msg);
+static void BUS_EncodeMsg(Msg_t * msg, CANMsg_t * can);
+static void BUS_DecodeMsg(CANMsg_t * can, Msg_t * msg);
+static bool BUS_RxMsg(Msg_t * msg);
 
 
 /*
@@ -41,23 +39,23 @@ static struct {
  * PUBLIC FUNCTIONS
  */
 
-void COMMS_Init()
+void BUS_Init()
 {
 	CAN_Init();
 }
 
-void COMMS_Deinit()
+void BUS_Deinit()
 {
 	CAN_Deinit();
 }
 
-void COMMS_Update(State_t state)
+void BUS_Update(State_t state)
 {
 
 #ifdef IS_BUSMASTER
 	if (HAL_GetTick() - gStatus.lastBusStatus > BUSSTATUS_PERIOD)
 	{
-		COMMS_Broadcast(TOPIC_BusState, NULL, 0);
+		BUS_Broadcast(TOPIC_BusState, NULL, 0);
 	}
 #else
 	if (HAL_GetTick() - gStatus.lastBusStatus > BUSSTATUS_PERIOD)
@@ -71,7 +69,7 @@ void COMMS_Update(State_t state)
 	}
 
 	Msg_t msg;
-	while (COMMS_RxMsg(&msg))
+	while (BUS_RxMsg(&msg))
 	{
 		if (msg.src == gCfg.address)
 		{
@@ -79,55 +77,23 @@ void COMMS_Update(State_t state)
 		}
 		else if (msg.dst == DST_BROADCAST || msg.dst == gCfg.address)
 		{
-			COMMS_HandleMsg(&msg);
+			MSG_Handle(&msg, MsgSrc_Bus);
 		}
 	}
 }
 
-void COMMS_Broadcast(Topic_t topic, uint8_t * data, uint8_t len)
-{
-	COMMS_Send(topic, data, len, DST_BROADCAST);
-}
-
-void COMMS_Send(Topic_t topic, uint8_t * data, uint8_t len, uint8_t dest)
-{
-	Msg_t msg = {
-		.len = len,
-		.dst = dest,
-		.prio = 1,
-		.src = gCfg.address,
-		.topic = topic
-	};
-	memcpy(msg.data, data, len);
-	COMMS_TxMsg(&msg);
-}
-
-void COMMS_SendMsg(Msg_t * msg)
-{
-	COMMS_TxMsg(msg);
-}
-
-
-void COMMS_HandleMsg(Msg_t * msg)
-{
-	switch (msg->topic)
-	{
 #ifndef IS_BUSMASTER
-	case TOPIC_BusState:
-		gStatus.lastBusStatus = HAL_GetTick();
-		break;
-#endif
-	default:
-		break;
-	}
+void BUS_RecieveState(void)
+{
+	gStatus.lastBusStatus = HAL_GetTick();
 }
-
+#endif
 
 /*
  * PRIVATE FUNCTIONS
  */
 
-static void COMMS_EncodeMsg(Msg_t * msg, CANMsg_t * can)
+static void BUS_EncodeMsg(Msg_t * msg, CANMsg_t * can)
 {
 	memcpy(can->data, msg->data, msg->len);
 	can->len = msg->len;
@@ -137,7 +103,7 @@ static void COMMS_EncodeMsg(Msg_t * msg, CANMsg_t * can)
 			|  msg->topic;
 }
 
-static void COMMS_DecodeMsg(CANMsg_t * can, Msg_t * msg)
+static void BUS_DecodeMsg(CANMsg_t * can, Msg_t * msg)
 {
 	memcpy(msg->data, can->data, can->len);
 	msg->len = can->len;
@@ -148,21 +114,21 @@ static void COMMS_DecodeMsg(CANMsg_t * can, Msg_t * msg)
 	msg->topic 	= id & 0x3FF;
 }
 
-static bool COMMS_RxMsg(Msg_t * msg)
+static bool BUS_RxMsg(Msg_t * msg)
 {
 	CANMsg_t cmsg;
 	if (CAN_Rx(&cmsg))
 	{
-		COMMS_DecodeMsg(&cmsg, msg);
+		BUS_DecodeMsg(&cmsg, msg);
 		return true;
 	}
 	return false;
 }
 
-static bool COMMS_TxMsg(Msg_t * msg)
+bool BUS_TxMsg(Msg_t * msg)
 {
 	CANMsg_t cmsg;
-	COMMS_EncodeMsg(msg, &cmsg);
+	BUS_EncodeMsg(msg, &cmsg);
 	return CAN_Tx(&cmsg);
 }
 

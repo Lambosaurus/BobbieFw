@@ -1,12 +1,12 @@
 /* USER CODE BEGIN Header */
 
+#include <Bus.h>
 #include "LED.h"
 #include "Core.h"
 #include "UART.h"
 #include "ADC.h"
 #include "NTC.h"
 #include "Button.h"
-#include "Comms.h"
 #include "Error.h"
 #include "Config.h"
 #include "Serial.h"
@@ -61,7 +61,7 @@ int main(void)
 #ifdef USE_ISENSE
 	ISENSE_Init();
 #endif
-	COMMS_Init();
+	BUS_Init();
 	SER_Init();
 
 	State_Reset();
@@ -70,7 +70,7 @@ int main(void)
 	{
 		State_t state = State_Update();
 
-		COMMS_Update(state);
+		BUS_Update(state);
 #ifdef USE_PSU
 		PSU_Update(state);
 #endif

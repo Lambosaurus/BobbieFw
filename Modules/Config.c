@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "E3PROM.h"
 #include <string.h>
+#include "LED.h"
 
 /*
  * PRIVATE DEFINITIONS
@@ -46,8 +47,73 @@ void CFG_Default(void)
 		.ledAlpha = 0x8,	 // Half power
 		.errorCooldown = 30, // 3s
 		.activeTimeout = 10, // 1s
+#ifdef SER_USE_BRIDGE
+		.serialBridge = 0,	 // false
+#endif
 	};
 	memcpy(&gCfg, &cfg, sizeof(gCfg));
+}
+
+bool CFG_Get(ConfigEnum_t en, uint32_t * value)
+{
+	switch (en)
+	{
+	case Config_Address:
+		*value = gCfg.address;
+		return true;
+	case Config_LedAlpha:
+		*value = gCfg.ledAlpha;
+		return true;
+	case Config_ErrorCooldown:
+		*value = gCfg.errorCooldown;
+		return true;
+	case Config_ActiveTimeout:
+		*value = gCfg.activeTimeout;
+		return true;
+#ifdef SER_USE_BRIDGE
+	case Config_SerialBridge:
+		*value = gCfg.serialBridge;
+		return true;
+#endif
+	}
+	return false;
+}
+
+bool CFG_Set(ConfigEnum_t en, uint32_t value)
+{
+	switch (en)
+	{
+	case Config_Address:
+		if (value > 0)
+		{
+			gCfg.address = value;
+			return true;
+		}
+		break;
+	case Config_LedAlpha:
+		if (value <= COLOR_GAIN_MAX)
+		{
+			gCfg.ledAlpha = value;
+			return true;
+		}
+		break;
+	case Config_ErrorCooldown:
+		gCfg.errorCooldown = value;
+		return true;
+	case Config_ActiveTimeout:
+		gCfg.activeTimeout = value;
+		return true;
+#ifdef SER_USE_BRIDGE
+	case Config_SerialBridge:
+		if (value <= 1)
+		{
+			gCfg.serialBridge = value;
+			return true;
+		}
+		break;
+#endif
+	}
+	return false;
 }
 
 

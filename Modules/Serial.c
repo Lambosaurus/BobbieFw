@@ -1,7 +1,10 @@
 
+#include "Messages.h"
+#include "Bus.h"
 #include "Serial.h"
 #include "UART.h"
-#include "Comms.h"
+#include "Config.h"
+#include <string.h>
 
 /*
  * PRIVATE DEFINITIONS
@@ -11,6 +14,15 @@
  * PRIVATE TYPES
  */
 
+#define SER_STRAT_NEW
+
+#ifdef SER_STRAT_NEW
+typedef enum {
+	DECODE_START,
+	DECODE_HEADER,
+	DECODE_DATA,
+} DecodeState_t;
+#else
 typedef enum {
 	DECODE_START,
 	DECODE_HEADER,
@@ -18,39 +30,50 @@ typedef enum {
 	DECODE_DST,
 	DECODE_DATA,
 } DecodeState_t;
+#endif
 
-#define START_CHAR 	0x5F
+#define START_CHAR 				0x5F
 
-#define SERIAL_TIMEOUT_MS	100
+#define SERIAL_TIMEOUT_MS		100
 
 #define HEADER_MASK_LEN			0x0F
-#define HEADER_MASK_FLAGS		0x30
 #define HEADER_MASK_TOPIC		0xC0
-
-#define FLAG_TO_LOCAL			0x10
-#define FLAG_TO_BUS				0x20
 
 /*
  * PRIVATE PROTOTYPES
  */
 
-void SER_Read(void);
-void SER_HandleChar(char ch);
-void SER_HandleMsg(Msg_t * msg, uint8_t flags);
+static void SER_Read(void);
+#ifdef SER_STRAT_NEW
+static void SER_ParseMsg(uint8_t * bfr, uint8_t length);
+#endif
+static void SER_HandleChar(uint8_t ch);
+static void SER_HandleMsg(Msg_t * msg);
 
 /*
  * PRIVATE VARIABLES
  */
 
+#ifdef SER_STRAT_NEW
+static struct {
+	struct {
+		uint16_t index;
+		DecodeState_t state;
+		uint8_t bfr[SERIAL_SIZE_MAX];
+		uint8_t length;
+		uint32_t timeout;
+	} rx;
+} gState;
+#else
 static struct {
 	struct {
 		uint16_t index;
 		DecodeState_t state;
 		Msg_t msg;
-		uint8_t flags;
 		uint32_t timeout;
 	}rx;
 } gState;
+#endif
 
 /*
  * PUBLIC FUNCTIONS
@@ -72,11 +95,24 @@ void SER_Update(State_t state)
 	SER_Read();
 }
 
+#ifdef SER_USE_BRIDGE
+void SER_TxMsg(Msg_t * msg)
+{
+	uint8_t bfr[SERIAL_SIZE_MAX];
+	bfr[0] = START_CHAR;
+	bfr[1] = (uint8_t)((msg->topic >> 2) & HEADER_MASK_TOPIC) | (msg->len);
+	bfr[2] = msg->src;
+	bfr[3] = (uint8_t)(msg->topic);
+	memcpy(bfr + SERIAL_SIZE_HEADER, msg->data, msg->len);
+	UART_Tx(SER_UART, bfr, SERIAL_SIZE_HEADER + msg->len);
+}
+#endif
+
 /*
  * PRIVATE FUNCTIONS
  */
 
-void SER_Read(void)
+static void SER_Read(void)
 {
 	uint16_t ready = UART_RxCount(SER_UART);
 	if (ready)
@@ -97,7 +133,50 @@ void SER_Read(void)
 	}
 }
 
-void SER_HandleChar(char ch)
+#ifdef SER_STRAT_NEW
+
+
+static void SER_HandleChar(uint8_t ch)
+{
+	switch (gState.rx.state)
+	{
+	case DECODE_START:
+		if (ch == START_CHAR)
+		{
+			gState.rx.state = DECODE_HEADER;
+		}
+		break;
+	case DECODE_HEADER:
+		gState.rx.state = DECODE_DATA;
+		gState.rx.bfr[1] = ch;
+		gState.rx.index = 2; // Skip the start char and header.
+		gState.rx.length = (ch & HEADER_MASK_LEN) + SERIAL_SIZE_HEADER;
+		break;
+	case DECODE_DATA:
+		gState.rx.bfr[gState.rx.index++] = ch;
+		if (gState.rx.index >= gState.rx.length)
+		{
+			SER_ParseMsg(gState.rx.bfr, gState.rx.length);
+			gState.rx.state = DECODE_START;
+		}
+		break;
+	}
+}
+
+static void SER_ParseMsg(uint8_t * bfr, uint8_t length)
+{
+	Msg_t msg = {
+			.src = 0,
+			.dst = bfr[3],
+			.topic = bfr[2] | ((uint32_t)(bfr[1] & HEADER_MASK_TOPIC) << 2),
+			.len = length - SERIAL_SIZE_HEADER,
+	};
+	memcpy(msg.data, bfr+SERIAL_SIZE_HEADER, msg.len);
+	SER_HandleMsg(&msg);
+}
+
+#else
+static void SER_HandleChar(uint8_t ch)
 {
 	switch (gState.rx.state)
 	{
@@ -117,7 +196,6 @@ void SER_HandleChar(char ch)
 		else
 		{
 			gState.rx.msg.len = len;
-			gState.rx.flags = ch & HEADER_MASK_FLAGS;
 			gState.rx.msg.topic = (uint32_t)(ch & HEADER_MASK_TOPIC) << 2;
 			gState.rx.state = DECODE_TOPIC;
 		}
@@ -132,7 +210,7 @@ void SER_HandleChar(char ch)
 		gState.rx.state = DECODE_DATA;
 		if (gState.rx.msg.len == 0)
 		{
-			SER_HandleMsg(&(gState.rx.msg), gState.rx.flags);
+			SER_HandleMsg(&(gState.rx.msg));
 			gState.rx.state = DECODE_START;
 		}
 		else
@@ -145,23 +223,18 @@ void SER_HandleChar(char ch)
 		gState.rx.msg.data[gState.rx.index++] = ch;
 		if (gState.rx.index >= gState.rx.msg.len)
 		{
-			SER_HandleMsg(&(gState.rx.msg), gState.rx.flags);
+			SER_HandleMsg(&(gState.rx.msg));
 			gState.rx.state = DECODE_START;
 		}
 		break;
 	}
 }
+#endif
 
-void SER_HandleMsg(Msg_t * msg, uint8_t flags)
+static void SER_HandleMsg(Msg_t * msg)
 {
-	if (flags & FLAG_TO_LOCAL)
-	{
-		COMMS_HandleMsg(msg);
-	}
-	if (flags & FLAG_TO_BUS)
-	{
-		COMMS_SendMsg(msg);
-	}
+	msg->src = 0;
+	MSG_Handle(msg, MsgSrc_Serial);
 }
 
 /*
