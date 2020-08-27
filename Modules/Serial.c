@@ -32,14 +32,13 @@ typedef enum {
 } DecodeState_t;
 #endif
 
-#define START_CHAR 				0x5F
 
 #define SERIAL_TIMEOUT_MS		100
 
+#define SERIAL_START_CHAR 		0x5F
 #define HEADER_MASK_LEN			0x0F
 #define HEADER_MASK_TOPIC		0xC0
 #define HEADER_MASK_FLAGS		0x30
-
 #define SERIAL_FLAG_TOLOCAL		0x10
 
 
@@ -102,7 +101,7 @@ void SER_Update(State_t state)
 void SER_TxMsg(Msg_t * msg)
 {
 	uint8_t bfr[SERIAL_SIZE_MAX];
-	bfr[0] = START_CHAR;
+	bfr[0] = SERIAL_START_CHAR;
 	bfr[1] = (uint8_t)((msg->topic >> 2) & HEADER_MASK_TOPIC) | (msg->len);
 	bfr[2] = msg->src;
 	bfr[3] = (uint8_t)(msg->topic);
@@ -144,16 +143,24 @@ static void SER_HandleChar(uint8_t ch)
 	switch (gState.rx.state)
 	{
 	case DECODE_START:
-		if (ch == START_CHAR)
+		if (ch == SERIAL_START_CHAR)
 		{
 			gState.rx.state = DECODE_HEADER;
 		}
 		break;
 	case DECODE_HEADER:
-		gState.rx.state = DECODE_DATA;
-		gState.rx.bfr[1] = ch;
-		gState.rx.index = 2; // Skip the start char and header.
-		gState.rx.length = (ch & HEADER_MASK_LEN) + SERIAL_SIZE_HEADER;
+		uint8_t len = ch & HEADER_MASK_LEN;
+		if (len > SERIAL_SIZE_DATA)
+		{
+			gState.rx.state = DECODE_START;
+		}
+		else
+		{
+			gState.rx.state = DECODE_DATA;
+			gState.rx.bfr[1] = ch;
+			gState.rx.index = 2; // Skip the start char and header.
+			gState.rx.length = len + SERIAL_SIZE_HEADER;
+		}
 		break;
 	case DECODE_DATA:
 		gState.rx.bfr[gState.rx.index++] = ch;
