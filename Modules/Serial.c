@@ -38,6 +38,10 @@ typedef enum {
 
 #define HEADER_MASK_LEN			0x0F
 #define HEADER_MASK_TOPIC		0xC0
+#define HEADER_MASK_FLAGS		0x30
+
+#define SERIAL_FLAG_TOLOCAL		0x10
+
 
 /*
  * PRIVATE PROTOTYPES
@@ -48,7 +52,6 @@ static void SER_Read(void);
 static void SER_ParseMsg(uint8_t * bfr, uint8_t length);
 #endif
 static void SER_HandleChar(uint8_t ch);
-static void SER_HandleMsg(Msg_t * msg);
 
 /*
  * PRIVATE VARIABLES
@@ -165,14 +168,15 @@ static void SER_HandleChar(uint8_t ch)
 
 static void SER_ParseMsg(uint8_t * bfr, uint8_t length)
 {
+	uint8_t header = bfr[1];
 	Msg_t msg = {
-			.src = 0,
-			.dst = bfr[3],
-			.topic = bfr[2] | ((uint32_t)(bfr[1] & HEADER_MASK_TOPIC) << 2),
-			.len = length - SERIAL_SIZE_HEADER,
+		.src = gCfg.address,
+		.dst = (header & SERIAL_FLAG_TOLOCAL) ? bfr[3] : gCfg.address,
+		.topic = bfr[2] | ((uint32_t)(header & HEADER_MASK_TOPIC) << 2),
+		.len = length - SERIAL_SIZE_HEADER,
 	};
 	memcpy(msg.data, bfr+SERIAL_SIZE_HEADER, msg.len);
-	SER_HandleMsg(&msg);
+	MSG_Handle(&msg, MsgSrc_Serial);
 }
 
 #else
@@ -231,11 +235,6 @@ static void SER_HandleChar(uint8_t ch)
 }
 #endif
 
-static void SER_HandleMsg(Msg_t * msg)
-{
-	msg->src = 0;
-	MSG_Handle(msg, MsgSrc_Serial);
-}
 
 /*
  * INTERRUPT ROUTINES

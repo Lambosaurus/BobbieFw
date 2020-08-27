@@ -20,6 +20,12 @@ typedef enum {
 	Config_SerialBridge,
 } ConfigEnum_t;
 
+typedef enum {
+	SerialBridge_None = 0,
+	SerialBridge_Local,
+	SerialBridge_All
+} SerialBridgeMode_t;
+
 // Care to word align this..
 typedef struct {
 	uint8_t address;

@@ -59,7 +59,7 @@ void MSG_Handle(Msg_t * msg, MsgSrc_t src)
 			BUS_TxMsg(msg);
 		}
 	}
-	else if (gCfg.serialBridge)
+	else if (gCfg.serialBridge >= SerialBridge_All)
 	{
 		// From bus messages get forwarded to serial
 		SER_TxMsg(msg);
@@ -91,7 +91,7 @@ void MSG_SendMsg(Msg_t * msg)
 	BUS_TxMsg(msg);
 
 #ifdef SER_USE_BRIDGE
-	if (gCfg.serialBridge)
+	if (gCfg.serialBridge >= SerialBridge_Local)
 	{
 		SER_TxMsg(msg);
 	}

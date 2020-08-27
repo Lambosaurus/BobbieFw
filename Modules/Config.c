@@ -48,7 +48,7 @@ void CFG_Default(void)
 		.errorCooldown = 30, // 3s
 		.activeTimeout = 10, // 1s
 #ifdef SER_USE_BRIDGE
-		.serialBridge = 0,	 // false
+		.serialBridge = SerialBridge_None,
 #endif
 	};
 	memcpy(&gCfg, &cfg, sizeof(gCfg));
@@ -105,7 +105,7 @@ bool CFG_Set(ConfigEnum_t en, uint32_t value)
 		return true;
 #ifdef SER_USE_BRIDGE
 	case Config_SerialBridge:
-		if (value <= 1)
+		if (value <= SerialBridge_All)
 		{
 			gCfg.serialBridge = value;
 			return true;
