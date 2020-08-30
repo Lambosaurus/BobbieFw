@@ -76,7 +76,7 @@ void MSG_Broadcast(Topic_t topic, uint8_t * data, uint8_t len)
 void MSG_Send(Topic_t topic, uint8_t * data, uint8_t len, uint8_t dest)
 {
 	Msg_t msg = {
-		.len= len,
+		.len = len,
 		.dst = dest,
 		.prio = 1,
 		.topic = topic

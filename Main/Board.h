@@ -13,6 +13,7 @@ extern "C" {
 //#define BRD_PI
 #define BRD_SERVO
 //#define BRD_PWR
+//#define IS_BUSMASTER
 
 #define CORE_USE_HSE
 

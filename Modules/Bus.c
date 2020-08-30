@@ -55,10 +55,11 @@ void BUS_Update(State_t state)
 #ifdef IS_BUSMASTER
 	if (HAL_GetTick() - gStatus.lastBusStatus > BUSSTATUS_PERIOD)
 	{
-		BUS_Broadcast(TOPIC_BusState, NULL, 0);
+		MSG_Broadcast(TOPIC_BusState, NULL, 0);
+		gStatus.lastBusStatus = HAL_GetTick();
 	}
 #else
-	if (HAL_GetTick() - gStatus.lastBusStatus > BUSSTATUS_PERIOD)
+	if (HAL_GetTick() - gStatus.lastBusStatus > BUSSTATUS_TIMEOUT)
 	{
 		ERR_Set(ERR_BusTimeout);
 	}
