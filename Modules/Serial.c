@@ -149,6 +149,7 @@ static void SER_HandleChar(uint8_t ch)
 		}
 		break;
 	case DECODE_HEADER:
+	{
 		uint8_t len = ch & HEADER_MASK_LEN;
 		if (len > SERIAL_SIZE_DATA)
 		{
@@ -162,6 +163,7 @@ static void SER_HandleChar(uint8_t ch)
 			gState.rx.length = len + SERIAL_SIZE_HEADER;
 		}
 		break;
+	}
 	case DECODE_DATA:
 		gState.rx.bfr[gState.rx.index++] = ch;
 		if (gState.rx.index >= gState.rx.length)
