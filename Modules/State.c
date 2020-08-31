@@ -73,6 +73,12 @@ void State_Reset(void)
 	gState.state = State_Idle;
 }
 
+State_t State_Last(void)
+{
+	return gState.state;
+}
+
+
 /*
  * PRIVATE FUNCTIONS
  */

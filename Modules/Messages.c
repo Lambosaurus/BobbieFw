@@ -34,6 +34,7 @@
  */
 
 static void MSG_HandleTopic_Config(Msg_t * msg);
+static void MSG_HandleTopic_Hello(Msg_t * msg);
 static void MSG_HandleTopic(Msg_t * msg);
 
 
@@ -114,11 +115,29 @@ static void MSG_HandleTopic(Msg_t * msg)
 	case TOPIC_Config:
 		MSG_HandleTopic_Config(msg);
 		break;
+	case TOPIC_Hello:
+		MSG_HandleTopic_Hello(msg);
+		break;
 	default:
 		break;
 	}
 }
 
+static void MSG_HandleTopic_Hello(Msg_t * msg)
+{
+	if (msg->len >= 1)
+	{
+		if (msg->data[0] == TOPIC_Hello_Request)
+		{
+			uint8_t data[3] = {
+					TOPIC_Hello_Reply,
+					BOARD_TYPE,
+					State_Last()
+			};
+			MSG_Send(TOPIC_Hello, data, sizeof(data), msg->src);
+		}
+	}
+}
 
 static void MSG_HandleTopic_Config(Msg_t * msg)
 {

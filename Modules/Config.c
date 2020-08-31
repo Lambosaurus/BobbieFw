@@ -3,6 +3,7 @@
 #include "E3PROM.h"
 #include <string.h>
 #include "LED.h"
+#include "Messages.h"
 
 /*
  * PRIVATE DEFINITIONS
@@ -43,7 +44,7 @@ void CFG_Save(void)
 void CFG_Default(void)
 {
 	Config_t cfg = {
-		.address = 1,
+		.address = BOARD_TYPE,
 		.ledAlpha = 0x8,	 // Half power
 		.errorCooldown = 30, // 3s
 		.activeTimeout = 10, // 1s

@@ -14,10 +14,19 @@
 
 #define DST_BROADCAST 0
 
+
+typedef enum {
+	BoardType_Pwr,
+	BoardType_Pi,
+	BoardType_Motor,
+	BoardType_Servo
+} BoardType_t;
+
 typedef enum {
 	TOPIC_None = 0,
 	TOPIC_BusState,
 	TOPIC_Config,
+	TOPIC_Hello
 } Topic_t;
 
 typedef enum {
@@ -28,6 +37,11 @@ typedef enum {
 	TOPIC_Config_Load,
 	TOPIC_Config_Is,
 } Topic_Config_t;
+
+typedef enum {
+	TOPIC_Hello_Request,
+	TOPIC_Hello_Reply
+} Topic_Hello_t;
 
 typedef struct {
 	uint8_t data[8];

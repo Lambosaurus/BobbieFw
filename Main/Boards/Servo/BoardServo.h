@@ -1,6 +1,7 @@
 #ifndef BOARD_SERVO_H
 #define BOARD_SERVO_H
 
+#define BOARD_TYPE BoardType_Servo
 
 #define USE_PSU
 #define PSU_EN_GPIO		GPIOC
