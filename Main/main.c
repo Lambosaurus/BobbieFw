@@ -48,7 +48,6 @@ int main(void)
 
 	LED_Init();
 	LED_Set(LED_RED);
-	UART_Init(UART_2, 115200);
 	ADC_Init();
 
 	ERR_Init();
