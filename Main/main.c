@@ -1,7 +1,6 @@
 /* USER CODE BEGIN Header */
 
 #include <Bus.h>
-#include "LED.h"
 #include "Core.h"
 #include "UART.h"
 #include "ADC.h"
@@ -10,6 +9,7 @@
 #include "Error.h"
 #include "Config.h"
 #include "Serial.h"
+#include "Blink.h"
 
 #ifdef USE_PSU
 #include "PSU.h"
@@ -21,21 +21,6 @@
 #include "ISense.h"
 #endif
 
-Color_t MAIN_StatusColor(State_t state)
-{
-	switch (state)
-	{
-	case State_Active:
-		return LED_GRN;
-	case State_Idle:
-		return LED_AMB;
-	case State_Sleep:
-		return LED_BLK;
-	case State_Error:
-	default:
-		return LED_RED;
-	}
-}
 
 int main(void)
 {
@@ -46,9 +31,8 @@ int main(void)
 	//CFG_Default();
 	//CFG_Save();
 
-	LED_Init();
-	LED_Set(LED_RED);
 	UART_Init(UART_2, 115200);
+	BLINK_Init();
 	ADC_Init();
 
 	ERR_Init();
@@ -97,7 +81,7 @@ int main(void)
 		int16_t temp = NTC_10K(ADC_Read( NTC_AIN ));
 		*/
 
-		LED_Set( COLOR_Alpha( MAIN_StatusColor(state), gCfg.ledAlpha) );
+		BLINK_Update(state);
 
 		CORE_Idle();
 	}

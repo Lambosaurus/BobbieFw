@@ -3,6 +3,7 @@
 #include "Serial.h"
 #include "Board.h"
 #include "Config.h"
+#include "Blink.h"
 #include <string.h>
 
 /*
@@ -127,7 +128,9 @@ static void MSG_HandleTopic_Hello(Msg_t * msg)
 {
 	if (msg->len >= 1)
 	{
-		if (msg->data[0] == TOPIC_Hello_Request)
+		switch (msg->data[0])
+		{
+		case TOPIC_Hello_Request:
 		{
 			uint8_t data[3] = {
 					TOPIC_Hello_Reply,
@@ -135,6 +138,19 @@ static void MSG_HandleTopic_Hello(Msg_t * msg)
 					State_Last()
 			};
 			MSG_Send(TOPIC_Hello, data, sizeof(data), msg->src);
+			break;
+		}
+		case TOPIC_Hello_Blink:
+			if (msg->len >= 7)
+			{
+				Color_t color = COLOR(msg->data[1], msg->data[2], msg->data[3]);
+				uint16_t duration = READ_U16(msg->data, 4);
+				uint8_t blinks = msg->data[6];
+				if (duration > 5000) { duration = 5000; }
+				if (blinks > 4) { blinks = 4; }
+				BLINK_Start(color, duration, blinks);
+			}
+			break;
 		}
 	}
 }

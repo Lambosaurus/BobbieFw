@@ -29,7 +29,7 @@ typedef enum {
 // Care to word align this..
 typedef struct {
 	uint8_t address;
-	uint8_t ledAlpha;			// 0 - 16
+	uint8_t ledAlpha;			// 0 - 255
 	uint8_t errorCooldown;		// 100ms steps
 	uint8_t activeTimeout; 		// 100ms steps
 #ifdef SER_USE_BRIDGE

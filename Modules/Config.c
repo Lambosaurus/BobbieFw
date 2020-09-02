@@ -45,7 +45,7 @@ void CFG_Default(void)
 {
 	Config_t cfg = {
 		.address = BOARD_TYPE,
-		.ledAlpha = 0x8,	 // Half power
+		.ledAlpha = 127,	 // Half power
 		.errorCooldown = 30, // 3s
 		.activeTimeout = 10, // 1s
 #ifdef SER_USE_BRIDGE
@@ -92,7 +92,7 @@ bool CFG_Set(ConfigEnum_t en, uint32_t value)
 		}
 		break;
 	case Config_LedAlpha:
-		if (value <= COLOR_GAIN_MAX)
+		if (value <= 255)
 		{
 			gCfg.ledAlpha = value;
 			return true;

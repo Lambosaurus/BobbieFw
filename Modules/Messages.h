@@ -40,7 +40,8 @@ typedef enum {
 
 typedef enum {
 	TOPIC_Hello_Request,
-	TOPIC_Hello_Reply
+	TOPIC_Hello_Reply,
+	TOPIC_Hello_Blink,
 } Topic_Hello_t;
 
 typedef struct {

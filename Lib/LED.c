@@ -55,8 +55,10 @@ void LED_Deinit(void)
 
 Color_t COLOR_Alpha(Color_t color, uint8_t gain)
 {
-	if (gain > 0x10) { gain = 0x10; }
-	return (color * gain / 0x10) & 0x0F0F0F;
+	// gain from 0 to 16
+	gain = ((uint32_t)gain + 1) >> 4;
+	// times 0-16, div 16
+	return ((color * gain) >> 4) & 0x0F0F0F;
 }
 
 void LED_Set(Color_t color)

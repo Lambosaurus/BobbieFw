@@ -12,16 +12,18 @@
  */
 
 
+#define COLOR_GAIN_MAX	0x0F
+#define COLOR(r,g,b) (((r << 12) | (g << 4) | (b >> 4)) & 0x0F0F0F)
+
 typedef enum {
-	LED_BLK = 0x000000,
-	LED_RED = 0x0F0000,
-	LED_AMB = 0x090700,
-	LED_YEL = 0x090900,
-	LED_GRN = 0x000F00,
-	LED_BLU = 0x00000F,
+	LED_BLK = COLOR(0,0,0),
+	LED_RED = COLOR(0xFF, 0, 0),
+	LED_AMB = COLOR(0x90, 0x70, 0),
+	LED_YEL = COLOR(0x90, 0x90, 0),
+	LED_GRN = COLOR(0,0xFF,0),
+	LED_BLU = COLOR(0,0,0xFF),
 } Color_t;
 
-#define COLOR_GAIN_MAX	0x0F
 
 /*
  * PUBLIC FUNCTIONS
