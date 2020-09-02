@@ -78,8 +78,8 @@ void SER_TxMsg(Msg_t * msg)
 	uint8_t bfr[SERIAL_SIZE_MAX];
 	bfr[0] = SERIAL_START_CHAR;
 	bfr[1] = (uint8_t)((msg->topic >> 2) & HEADER_MASK_TOPIC) | (msg->len);
-	bfr[2] = msg->src;
-	bfr[3] = (uint8_t)(msg->topic);
+	bfr[2] = (uint8_t)(msg->topic);
+	bfr[3] = msg->src;
 	memcpy(bfr + SERIAL_SIZE_HEADER, msg->data, msg->len);
 	UART_Tx(SER_UART, bfr, SERIAL_SIZE_HEADER + msg->len);
 }
@@ -152,9 +152,10 @@ static void SER_ParseMsg(uint8_t * bfr, uint8_t length)
 	uint8_t header = bfr[1];
 	Msg_t msg = {
 		.src = gCfg.address,
-		.dst = (header & SERIAL_FLAG_TOLOCAL) ? bfr[3] : gCfg.address,
+		.dst = (header & SERIAL_FLAG_TOLOCAL) ? gCfg.address : bfr[3],
 		.topic = bfr[2] | ((uint32_t)(header & HEADER_MASK_TOPIC) << 2),
 		.len = length - SERIAL_SIZE_HEADER,
+		.prio = 2,
 	};
 	memcpy(msg.data, bfr+SERIAL_SIZE_HEADER, msg.len);
 	MSG_Handle(&msg, MsgSrc_Serial);

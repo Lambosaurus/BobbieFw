@@ -31,7 +31,6 @@ int main(void)
 	//CFG_Default();
 	//CFG_Save();
 
-	UART_Init(UART_2, 115200);
 	BLINK_Init();
 	ADC_Init();
 
