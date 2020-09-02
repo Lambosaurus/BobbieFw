@@ -14,23 +14,11 @@
  * PRIVATE TYPES
  */
 
-#define SER_STRAT_NEW
-
-#ifdef SER_STRAT_NEW
 typedef enum {
 	DECODE_START,
 	DECODE_HEADER,
 	DECODE_DATA,
 } DecodeState_t;
-#else
-typedef enum {
-	DECODE_START,
-	DECODE_HEADER,
-	DECODE_TOPIC,
-	DECODE_DST,
-	DECODE_DATA,
-} DecodeState_t;
-#endif
 
 
 #define SERIAL_TIMEOUT_MS		100
@@ -47,16 +35,13 @@ typedef enum {
  */
 
 static void SER_Read(void);
-#ifdef SER_STRAT_NEW
 static void SER_ParseMsg(uint8_t * bfr, uint8_t length);
-#endif
 static void SER_HandleChar(uint8_t ch);
 
 /*
  * PRIVATE VARIABLES
  */
 
-#ifdef SER_STRAT_NEW
 static struct {
 	struct {
 		uint16_t index;
@@ -66,16 +51,6 @@ static struct {
 		uint32_t timeout;
 	} rx;
 } gState;
-#else
-static struct {
-	struct {
-		uint16_t index;
-		DecodeState_t state;
-		Msg_t msg;
-		uint32_t timeout;
-	}rx;
-} gState;
-#endif
 
 /*
  * PUBLIC FUNCTIONS
@@ -135,9 +110,6 @@ static void SER_Read(void)
 	}
 }
 
-#ifdef SER_STRAT_NEW
-
-
 static void SER_HandleChar(uint8_t ch)
 {
 	switch (gState.rx.state)
@@ -187,63 +159,6 @@ static void SER_ParseMsg(uint8_t * bfr, uint8_t length)
 	memcpy(msg.data, bfr+SERIAL_SIZE_HEADER, msg.len);
 	MSG_Handle(&msg, MsgSrc_Serial);
 }
-
-#else
-static void SER_HandleChar(uint8_t ch)
-{
-	switch (gState.rx.state)
-	{
-	case DECODE_START:
-		if (ch == START_CHAR)
-		{
-			gState.rx.state = DECODE_HEADER;
-		}
-		break;
-	case DECODE_HEADER:
-	{
-		uint8_t len = ch & HEADER_MASK_LEN;
-		if (len > sizeof(gState.rx.msg.data))
-		{
-			gState.rx.state = DECODE_START;
-		}
-		else
-		{
-			gState.rx.msg.len = len;
-			gState.rx.msg.topic = (uint32_t)(ch & HEADER_MASK_TOPIC) << 2;
-			gState.rx.state = DECODE_TOPIC;
-		}
-		break;
-	}
-	case DECODE_TOPIC:
-		gState.rx.msg.topic |= ch;
-		gState.rx.state = DECODE_DST;
-		break;
-	case DECODE_DST:
-		gState.rx.msg.dst = ch;
-		gState.rx.state = DECODE_DATA;
-		if (gState.rx.msg.len == 0)
-		{
-			SER_HandleMsg(&(gState.rx.msg));
-			gState.rx.state = DECODE_START;
-		}
-		else
-		{
-			gState.rx.state = DECODE_DATA;
-			gState.rx.index = 0;
-		}
-		break;
-	case DECODE_DATA:
-		gState.rx.msg.data[gState.rx.index++] = ch;
-		if (gState.rx.index >= gState.rx.msg.len)
-		{
-			SER_HandleMsg(&(gState.rx.msg));
-			gState.rx.state = DECODE_START;
-		}
-		break;
-	}
-}
-#endif
-
 
 /*
  * INTERRUPT ROUTINES
