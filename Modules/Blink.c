@@ -49,10 +49,12 @@ void BLINK_Update(State_t state)
 		{
 			gState.blinks -= 1;
 			color = LED_BLK;
+			gState.start = now;
 		}
 		else
 		{
-			uint32_t gain = (gState.duration - elapsed) * 255 / gState.duration;
+			uint32_t gain = (gState.duration - elapsed) * 256 / gState.duration;
+			if (gain > 0xFF) { gain = 0xFF; }
 			color = COLOR_Alpha(gState.color, gain);
 		}
 	}

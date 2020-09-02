@@ -146,9 +146,10 @@ static void MSG_HandleTopic_Hello(Msg_t * msg)
 				Color_t color = COLOR(msg->data[1], msg->data[2], msg->data[3]);
 				uint16_t duration = READ_U16(msg->data, 4);
 				uint8_t blinks = msg->data[6];
-				if (duration > 5000) { duration = 5000; }
-				if (blinks > 4) { blinks = 4; }
-				BLINK_Start(color, duration, blinks);
+				if ((duration * blinks) <= 10000)
+				{
+					BLINK_Start(color, duration, blinks);
+				}
 			}
 			break;
 		}
