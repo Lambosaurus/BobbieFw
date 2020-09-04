@@ -28,6 +28,7 @@ typedef enum {
 
 // Care to word align this..
 typedef struct {
+	uint16_t version;
 	uint8_t address;
 	uint8_t ledAlpha;			// 0 - 255
 	uint8_t errorCooldown;		// 100ms steps

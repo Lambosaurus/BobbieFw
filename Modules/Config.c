@@ -9,6 +9,8 @@
  * PRIVATE DEFINITIONS
  */
 
+#define CONFIG_VERSION 0x0004
+
 /*
  * PRIVATE TYPES
  */
@@ -30,7 +32,7 @@ Config_t gCfg;
 
 void CFG_Load(void)
 {
-	if (!E3PROM_Read(&gCfg, sizeof(gCfg)))
+	if (!E3PROM_Read(&gCfg, sizeof(gCfg)) || gCfg.version != CONFIG_VERSION)
 	{
 		CFG_Default();
 	}
@@ -44,6 +46,7 @@ void CFG_Save(void)
 void CFG_Default(void)
 {
 	Config_t cfg = {
+		.version = CONFIG_VERSION,
 		.address = BOARD_TYPE,
 		.ledAlpha = 127,	 // Half power
 		.errorCooldown = 30, // 3s
