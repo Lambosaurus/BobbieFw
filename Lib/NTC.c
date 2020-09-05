@@ -92,10 +92,10 @@ int32_t TableInterpolate( int32_t * table, int8_t steps, int32_t start, int32_t 
 		return start + (step * steps);
 	}
 
-	int8_t i = 1;
-	while ( value > table[i] ) { i++; }
-	uint32_t p0 = table[i-1];
-	uint32_t p1 = table[i];
+	int8_t i = 0;
+	while ( value > table[i+1] ) { i++; }
+	uint32_t p0 = table[i];
+	uint32_t p1 = table[i+1];
 
 	int32_t alpha = (value - p0) * 1000 / (p1 - p0);
 	int32_t result = start + (i * step) + (alpha * step / 1000);
