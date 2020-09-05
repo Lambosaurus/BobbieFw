@@ -1,6 +1,7 @@
 
 #include "Error.h"
 #include "Config.h"
+#include "Messages.h"
 
 /*
  * PRIVATE DEFINITIONS
@@ -38,6 +39,7 @@ void ERR_Set(Error_t err)
 	{
 		gState.error = err;
 		State_Req(State_Error);
+		MSG_SendState(DST_BROADCAST);
 	}
 	gState.lastError = HAL_GetTick();
 }
@@ -60,7 +62,11 @@ Error_t ERR_Get(void)
 
 void ERR_Clear(void)
 {
-	gState.error = ERR_None;
+	if (gState.error != ERR_None)
+	{
+		gState.error = ERR_None;
+		MSG_SendState(DST_BROADCAST);
+	}
 	State_Reset();
 }
 

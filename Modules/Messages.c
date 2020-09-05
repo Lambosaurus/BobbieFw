@@ -4,6 +4,7 @@
 #include "Board.h"
 #include "Config.h"
 #include "Blink.h"
+#include "Error.h"
 #include <string.h>
 
 /*
@@ -35,7 +36,7 @@
  */
 
 static void MSG_HandleTopic_Config(Msg_t * msg);
-static void MSG_HandleTopic_Hello(Msg_t * msg);
+static void MSG_HandleTopic_State(Msg_t * msg);
 static void MSG_HandleTopic(Msg_t * msg);
 
 
@@ -100,6 +101,20 @@ void MSG_SendMsg(Msg_t * msg)
 #endif
 }
 
+void MSG_SendState(uint8_t dest)
+{
+	Error_t err = ERR_Get();
+	uint8_t data[5] = {
+			TOPIC_State_Is,
+			BOARD_TYPE,
+			State_Last(),
+			0,
+			0
+	};
+	WRITE_U16(data, 3, err);
+	MSG_Send(TOPIC_State, data, sizeof(data), dest);
+}
+
 /*
  * PRIVATE VARIABLES
  */
@@ -116,31 +131,26 @@ static void MSG_HandleTopic(Msg_t * msg)
 	case TOPIC_Config:
 		MSG_HandleTopic_Config(msg);
 		break;
-	case TOPIC_Hello:
-		MSG_HandleTopic_Hello(msg);
+	case TOPIC_State:
+		MSG_HandleTopic_State(msg);
 		break;
 	default:
 		break;
 	}
 }
 
-static void MSG_HandleTopic_Hello(Msg_t * msg)
+static void MSG_HandleTopic_State(Msg_t * msg)
 {
 	if (msg->len >= 1)
 	{
 		switch (msg->data[0])
 		{
-		case TOPIC_Hello_Request:
+		case TOPIC_State_Request:
 		{
-			uint8_t data[3] = {
-					TOPIC_Hello_Reply,
-					BOARD_TYPE,
-					State_Last()
-			};
-			MSG_Send(TOPIC_Hello, data, sizeof(data), msg->src);
+			MSG_SendState(msg->src);
 			break;
 		}
-		case TOPIC_Hello_Blink:
+		case TOPIC_State_Blink:
 			if (msg->len >= 7)
 			{
 				Color_t color = COLOR(msg->data[1], msg->data[2], msg->data[3]);
@@ -151,6 +161,9 @@ static void MSG_HandleTopic_Hello(Msg_t * msg)
 					BLINK_Start(color, duration, blinks);
 				}
 			}
+			break;
+		case TOPIC_State_Clear:
+			ERR_Clear();
 			break;
 		}
 	}

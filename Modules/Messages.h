@@ -26,7 +26,7 @@ typedef enum {
 	TOPIC_None = 0,
 	TOPIC_BusState,
 	TOPIC_Config,
-	TOPIC_Hello
+	TOPIC_State,
 } Topic_t;
 
 typedef enum {
@@ -39,10 +39,11 @@ typedef enum {
 } Topic_Config_t;
 
 typedef enum {
-	TOPIC_Hello_Request,
-	TOPIC_Hello_Reply,
-	TOPIC_Hello_Blink,
-} Topic_Hello_t;
+	TOPIC_State_Request,
+	TOPIC_State_Is,
+	TOPIC_State_Blink,
+	TOPIC_State_Clear,
+} Topic_State_t;
 
 typedef struct {
 	uint8_t data[8];
@@ -67,6 +68,6 @@ void MSG_Handle(Msg_t * msg, MsgSrc_t src);
 void MSG_Broadcast(Topic_t topic, uint8_t * data, uint8_t len);
 void MSG_Send(Topic_t topic, uint8_t * data, uint8_t len, uint8_t dest);
 void MSG_SendMsg(Msg_t * msg);
-
+void MSG_SendState(uint8_t dest);
 
 #endif //COMMS_H
