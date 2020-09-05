@@ -1,7 +1,7 @@
 #ifndef BOARD_SERVO_H
 #define BOARD_SERVO_H
 
-#define BOARD_TYPE BoardType_Servo
+#define BOARD_TYPE 		BoardType_Servo
 
 #define USE_PSU
 #define PSU_EN_GPIO		GPIOC
@@ -11,6 +11,7 @@
 #define PSU_FB_RHIGH	47
 #define PSU_MV_MIN		5500
 #define PSU_MV_MAX		6500
+#define PSU_STARTUP_MS	200
 
 #define USE_ISENSE
 #define ISENSE0_AIN		ADC_CHANNEL_1

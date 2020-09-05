@@ -17,6 +17,9 @@ typedef enum {
 	ERR_BusTimeout,
 	ERR_DuplicateAddress,
 	ERR_NoAddress,
+	ERR_PsuUndervolt,
+	ERR_PsuOvervolt,
+	ERR_PsuCurrentLimit,
 } Error_t;
 
 /*

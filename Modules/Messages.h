@@ -27,6 +27,7 @@ typedef enum {
 	TOPIC_BusState,
 	TOPIC_Config,
 	TOPIC_State,
+	TOPIC_Servo,
 } Topic_t;
 
 typedef enum {

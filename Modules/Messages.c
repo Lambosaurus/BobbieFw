@@ -39,6 +39,9 @@ static void MSG_HandleTopic_Config(Msg_t * msg);
 static void MSG_HandleTopic_State(Msg_t * msg);
 static void MSG_HandleTopic(Msg_t * msg);
 
+#ifdef USE_SERVO
+static void MSG_HandleTopic_Servo(Msg_t * msg);
+#endif
 
 /*
  * PUBLIC FUNCTIONS
@@ -134,6 +137,11 @@ static void MSG_HandleTopic(Msg_t * msg)
 	case TOPIC_State:
 		MSG_HandleTopic_State(msg);
 		break;
+#ifdef USE_SERVO
+	case TOPIC_Servo:
+		MSG_HandleTopic_Servo(msg);
+		break;
+#endif
 	default:
 		break;
 	}
@@ -211,6 +219,16 @@ static void MSG_HandleTopic_Config(Msg_t * msg)
 		}
 	}
 }
+
+#ifdef USE_SERVO
+static void MSG_HandleTopic_Servo(Msg_t * msg)
+{
+	if (msg->len)
+	{
+	}
+}
+#endif
+
 
 /*
  * PUBLIC FUNCTIONS

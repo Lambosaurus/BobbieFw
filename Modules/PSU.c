@@ -3,6 +3,7 @@
 
 #ifdef USE_PSU
 #include "ADC.h"
+#include "Error.h"
 
 /*
  * PRIVATE DEFINITIONS
@@ -67,6 +68,18 @@ void PSU_Update(State_t state)
 	}
 
 	gPsu.voltage = AIN_ToMv( ADC_Read(PSU_FB_AIN), PSU_FB_RLOW, PSU_FB_RHIGH);
+
+	if (gPsu.isEnabled && (HAL_GetTick() - gPsu.startTime > PSU_STARTUP_MS))
+	{
+		if (gPsu.voltage < PSU_MV_MIN)
+		{
+			ERR_Set(ERR_PsuUndervolt);
+		}
+	}
+	if (gPsu.voltage > PSU_MV_MAX)
+	{
+		ERR_Set(ERR_PsuOvervolt);
+	}
 }
 
 uint32_t PSU_GetVoltage()
