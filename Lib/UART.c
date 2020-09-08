@@ -14,6 +14,8 @@
 #define __UART_TX_ENABLE(uart) 	(uart->Instance->CR1 |= USART_CR1_TXEIE)
 #define __UART_TX_DISABLE(uart) (uart->Instance->CR1 &= ~USART_CR1_TXEIE)
 
+#define __UART_CLEAR_FLAGS(uart, flags) (uart->Instance->ICR |= flags)
+
 
 /*
  * PRIVATE TYPES
@@ -251,6 +253,11 @@ void USART_IRQHandler(UART_t *uart)
 			// Disable the TX IRQ.
 			__UART_TX_DISABLE(uart);
 		}
+	}
+
+	if (flags & (USART_ISR_ORE | USART_ISR_PE | USART_ISR_NE | USART_ISR_FE))
+	{
+		__UART_CLEAR_FLAGS(uart, (UART_CLEAR_PEF | UART_CLEAR_FEF | UART_CLEAR_NEF | UART_CLEAR_OREF));
 	}
 }
 
