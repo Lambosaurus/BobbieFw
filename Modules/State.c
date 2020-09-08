@@ -39,7 +39,7 @@ State_t State_Update(void)
 	return gState.state;
 }
 
-void State_Req(State_t state)
+bool State_Req(State_t state)
 {
 	switch (state)
 	{
@@ -66,6 +66,7 @@ void State_Req(State_t state)
 		}
 		break;
 	}
+	return gState.state == state;
 }
 
 void State_Reset(void)

@@ -12,7 +12,7 @@ typedef enum {
 } State_t;
 
 
-void State_Req(State_t state);
+bool State_Req(State_t state);
 State_t State_Update(void);
 void State_Reset(void);
 State_t State_Last(void);

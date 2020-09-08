@@ -7,6 +7,10 @@
 #include "Error.h"
 #include <string.h>
 
+#ifdef USE_SERVO
+#include "Servo.h"
+#endif
+
 /*
  * PRIVATE DEFINITIONS
  */
@@ -223,9 +227,17 @@ static void MSG_HandleTopic_Config(Msg_t * msg)
 #ifdef USE_SERVO
 static void MSG_HandleTopic_Servo(Msg_t * msg)
 {
-	if (msg->len)
+	if (State_Req(State_Active))
 	{
+		for (int i = 0; i < msg->len; i += 2)
+		{
+			uint16_t v = READ_U16(msg->data, i);
+			uint8_t s = (v >> 12) & 0x000F;
+			v &= 0x0FFF;
+			SERVO_Set(s, v);
+		}
 	}
+
 }
 #endif
 
