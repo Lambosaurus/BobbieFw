@@ -31,7 +31,7 @@ State_t State_Update(void)
 {
 	if (gState.state == State_Active)
 	{
-		if ( HAL_GetTick() - gState.lastActive > gCfg.activeTimeout)
+		if ( HAL_GetTick() - gState.lastActive > (gCfg.activeTimeout * 100))
 		{
 			gState.state = State_Idle;
 		}
