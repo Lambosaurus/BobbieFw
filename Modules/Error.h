@@ -20,6 +20,7 @@ typedef enum {
 	ERR_PsuUndervolt,
 	ERR_PsuOvervolt,
 	ERR_CurrentLimit,
+	ERR_Overtemp,
 } Error_t;
 
 /*

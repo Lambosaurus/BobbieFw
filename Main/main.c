@@ -2,14 +2,13 @@
 
 #include <Bus.h>
 #include "Core.h"
-#include "UART.h"
 #include "ADC.h"
-#include "NTC.h"
 #include "Button.h"
 #include "Error.h"
 #include "Config.h"
 #include "Serial.h"
 #include "Blink.h"
+#include "Temp.h"
 
 #ifdef USE_PSU
 #include "PSU.h"
@@ -46,6 +45,7 @@ int main(void)
 #endif
 	BUS_Init();
 	SER_Init();
+	TEMP_Init();
 
 	State_Reset();
 
@@ -53,6 +53,7 @@ int main(void)
 	{
 		State_t state = State_Update();
 
+		TEMP_Update(state);
 		BUS_Update(state);
 #ifdef USE_PSU
 		PSU_Update(state);
@@ -66,19 +67,6 @@ int main(void)
 		ERR_Update(state);
 		SER_Update(state);
 
-		/*
-		uint32_t now = HAL_GetTick();
-		static uint32_t tide = 0;
-		if (now - tide > 250)
-		{
-			uint16_t current = ISENSE_Read(0);
-			char bfr[100];
-			snprintf( bfr, sizeof(bfr), "I=%d\n", current);
-			UART_TxStr(UART_2, bfr);
-			tide = now;
-		}
-		int16_t temp = NTC_10K(ADC_Read( NTC_AIN ));
-		*/
 
 		BLINK_Update(state);
 

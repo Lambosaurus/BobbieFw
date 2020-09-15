@@ -54,6 +54,7 @@ void CFG_Default(void)
 #ifdef SER_USE_BRIDGE
 		.serialBridge = SerialBridge_None,
 #endif
+		.tempLimit = 80,
 	};
 	memcpy(&gCfg, &cfg, sizeof(gCfg));
 }
@@ -79,6 +80,9 @@ bool CFG_Get(ConfigEnum_t en, uint32_t * value)
 		*value = gCfg.serialBridge;
 		return true;
 #endif
+	case Config_TempLimit:
+		*value = gCfg.tempLimit;
+		return true;
 	}
 	return false;
 }
@@ -116,6 +120,9 @@ bool CFG_Set(ConfigEnum_t en, uint32_t value)
 		}
 		break;
 #endif
+	case Config_TempLimit:
+		gCfg.tempLimit = value;
+		return true;
 	}
 	return false;
 }

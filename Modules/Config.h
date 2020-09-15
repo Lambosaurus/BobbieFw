@@ -18,6 +18,7 @@ typedef enum {
 	Config_ErrorCooldown,
 	Config_ActiveTimeout,
 	Config_SerialBridge,
+	Config_TempLimit,
 } ConfigEnum_t;
 
 typedef enum {
@@ -36,6 +37,7 @@ typedef struct {
 #ifdef SER_USE_BRIDGE
 	uint8_t serialBridge;
 #endif
+	uint8_t tempLimit;
 } __attribute__((aligned(4))) Config_t;
 
 extern Config_t gCfg;
