@@ -9,7 +9,7 @@
  * PRIVATE DEFINITIONS
  */
 
-#define OVERTEMP_HYSTERESIS	5
+#define OVERTEMP_HYSTERESIS		50
 
 /*
  * PRIVATE TYPES
@@ -35,15 +35,15 @@ static struct {
 void TEMP_Init(void)
 {
 	gState.overtemp = false;
+	gState.temp = 0;
 }
 
 void TEMP_Update(State_t state)
 {
 	gState.temp = NTC_10K(ADC_Read( NTC_AIN ));
 
-	int16_t threshold = gCfg.tempLimit;
+	int16_t threshold = gCfg.tempLimit * 10;
 	if (gState.overtemp) { threshold += OVERTEMP_HYSTERESIS; }
-	threshold *= 10;
 
 	gState.overtemp = gState.temp > threshold;
 	if (gState.overtemp)
