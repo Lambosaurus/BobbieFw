@@ -15,15 +15,47 @@
  * PRIVATE TYPES
  */
 
+typedef const struct {
+	void * ref;
+	uint8_t size;
+	uint32_t min;
+	uint32_t max;
+	uint32_t init;
+	ConfigEnum_t key;
+} ConfigParam_t;
+
+#define CONFIG_PARAM(vkey, member, vinit, vmin, vmax) { \
+		.ref = &member,				\
+		.size =	sizeof(member),		\
+		.min = vmin,				\
+		.max = vmax,				\
+		.init = vinit,				\
+		.key = vkey,				\
+	}
+
 /*
  * PRIVATE PROTOTYPES
  */
+
+static uint32_t CFG_PARAM_Get(const ConfigParam_t * p);
+static void CFG_PARAM_Set(const ConfigParam_t * p, uint32_t value);
+static const ConfigParam_t * CFG_PARAM_Find(ConfigEnum_t en);
 
 /*
  * PRIVATE VARIABLES
  */
 
 Config_t gCfg;
+
+const static ConfigParam_t gParams[] = {
+		CONFIG_PARAM(Config_Address, gCfg.address, BOARD_TYPE, 0, 0xFF),
+		CONFIG_PARAM(Config_LedAlpha, gCfg.ledAlpha, 127, 0, 0xFF),
+		CONFIG_PARAM(Config_ErrorCooldown, gCfg.errorCooldown, 3000, 0, 60000),
+		CONFIG_PARAM(Config_ActiveTimeout, gCfg.activeTimeout, 3000, 0, 60000),
+		CONFIG_PARAM(Config_TempLimit, gCfg.tempLimit, 80, 0, 200),
+		CONFIG_PARAM(Config_FeedbackIdleInterval, gCfg.fbkIdleInterval, 2000, 0, 60000),
+		CONFIG_PARAM(Config_FeedbackActiveInterval, gCfg.fbkActiveInterval, 500, 0, 60000),
+};
 
 /*
  * PUBLIC FUNCTIONS
@@ -45,51 +77,20 @@ void CFG_Save(void)
 
 void CFG_Default(void)
 {
-	Config_t cfg = {
-		.version = CONFIG_VERSION,
-		.address = BOARD_TYPE,
-		.ledAlpha = 127,	 // Half power
-		.errorCooldown = 30, // 3s
-		.activeTimeout = 10, // 1s
-#ifdef SER_USE_BRIDGE
-		.serialBridge = SerialBridge_None,
-#endif
-		.tempLimit = 80,
-		.fbkIdleInterval = 20,
-		.fbkActiveInterval = 5,
-	};
-	memcpy(&gCfg, &cfg, sizeof(gCfg));
+	gCfg.version = CONFIG_VERSION;
+	for (uint32_t i = 0; i < sizeof(gParams) / sizeof(ConfigParam_t); i++)
+	{
+		const ConfigParam_t * p = gParams + i;
+		CFG_PARAM_Set(p, p->init);
+	}
 }
 
 bool CFG_Get(ConfigEnum_t en, uint32_t * value)
 {
-	switch (en)
+	const ConfigParam_t * p = CFG_PARAM_Find(en);
+	if (p != NULL)
 	{
-	case Config_Address:
-		*value = gCfg.address;
-		return true;
-	case Config_LedAlpha:
-		*value = gCfg.ledAlpha;
-		return true;
-	case Config_ErrorCooldown:
-		*value = gCfg.errorCooldown;
-		return true;
-	case Config_ActiveTimeout:
-		*value = gCfg.activeTimeout;
-		return true;
-#ifdef SER_USE_BRIDGE
-	case Config_SerialBridge:
-		*value = gCfg.serialBridge;
-		return true;
-#endif
-	case Config_TempLimit:
-		*value = gCfg.tempLimit;
-		return true;
-	case Config_FeedbackIdleInterval:
-		*value = gCfg.fbkIdleInterval;
-		return true;
-	case Config_FeedbackActiveInterval:
-		*value = gCfg.fbkActiveInterval;
+		*value = CFG_PARAM_Get(p);
 		return true;
 	}
 	return false;
@@ -97,46 +98,14 @@ bool CFG_Get(ConfigEnum_t en, uint32_t * value)
 
 bool CFG_Set(ConfigEnum_t en, uint32_t value)
 {
-	switch (en)
+	const ConfigParam_t * p = CFG_PARAM_Find(en);
+	if (p != NULL)
 	{
-	case Config_Address:
-		if (value > 0)
+		if (value < p->min || value > p->max)
 		{
-			gCfg.address = value;
+			CFG_PARAM_Set(p, value);
 			return true;
 		}
-		break;
-	case Config_LedAlpha:
-		if (value <= 255)
-		{
-			gCfg.ledAlpha = value;
-			return true;
-		}
-		break;
-	case Config_ErrorCooldown:
-		gCfg.errorCooldown = value;
-		return true;
-	case Config_ActiveTimeout:
-		gCfg.activeTimeout = value;
-		return true;
-#ifdef SER_USE_BRIDGE
-	case Config_SerialBridge:
-		if (value <= SerialBridge_All)
-		{
-			gCfg.serialBridge = value;
-			return true;
-		}
-		break;
-#endif
-	case Config_TempLimit:
-		gCfg.tempLimit = value;
-		return true;
-	case Config_FeedbackIdleInterval:
-		gCfg.fbkIdleInterval = value;
-		return true;
-	case Config_FeedbackActiveInterval:
-		gCfg.fbkActiveInterval = value;
-		return true;
 	}
 	return false;
 }
@@ -145,6 +114,51 @@ bool CFG_Set(ConfigEnum_t en, uint32_t value)
 /*
  * PRIVATE FUNCTIONS
  */
+
+static uint32_t CFG_PARAM_Get(const ConfigParam_t * p)
+{
+	switch (p->size)
+	{
+	default:
+	case 1:
+		return *(uint8_t*)p->ref;
+	case 2:
+		return *(uint16_t*)p->ref;
+	case 4:
+		return *(uint32_t*)p->ref;
+	}
+}
+
+static void CFG_PARAM_Set(const ConfigParam_t * p, uint32_t value)
+{
+	switch (p->size)
+	{
+	default:
+	case 1:
+		*(uint8_t*)p->ref = value;
+		break;
+	case 2:
+		*(uint16_t*)p->ref = value;
+		break;
+	case 4:
+		*(uint32_t*)p->ref = value;
+		break;
+	}
+}
+
+static const ConfigParam_t * CFG_PARAM_Find(ConfigEnum_t en)
+{
+	for (uint32_t i = 0; i < sizeof(gParams) / sizeof(ConfigParam_t); i++)
+	{
+		const ConfigParam_t * p = gParams + i;
+		if (p->key == en)
+		{
+			return p;
+		}
+	}
+	return NULL;
+}
+
 
 /*
  * INTERRUPT ROUTINES
