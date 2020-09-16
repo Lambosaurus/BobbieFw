@@ -16,7 +16,7 @@
  */
 
 typedef const struct {
-	void * ref;
+	void * reference;
 	uint8_t size;
 	uint32_t min;
 	uint32_t max;
@@ -24,13 +24,13 @@ typedef const struct {
 	ConfigEnum_t key;
 } ConfigParam_t;
 
-#define CONFIG_PARAM(vkey, member, vinit, vmin, vmax) { \
-		.ref = &member,				\
-		.size =	sizeof(member),		\
-		.min = vmin,				\
-		.max = vmax,				\
-		.init = vinit,				\
-		.key = vkey,				\
+#define CONFIG_PARAM(vkey, vreference, vinit, vmin, vmax) { \
+		.reference 	= &vreference,			\
+		.size 	  	= sizeof(vreference),	\
+		.min 		= vmin,					\
+		.max 		= vmax,					\
+		.init 		= vinit,				\
+		.key 		= vkey,					\
 	}
 
 /*
@@ -121,11 +121,11 @@ static uint32_t CFG_PARAM_Get(const ConfigParam_t * p)
 	{
 	default:
 	case 1:
-		return *(uint8_t*)p->ref;
+		return *(uint8_t*)p->reference;
 	case 2:
-		return *(uint16_t*)p->ref;
+		return *(uint16_t*)p->reference;
 	case 4:
-		return *(uint32_t*)p->ref;
+		return *(uint32_t*)p->reference;
 	}
 }
 
@@ -135,13 +135,13 @@ static void CFG_PARAM_Set(const ConfigParam_t * p, uint32_t value)
 	{
 	default:
 	case 1:
-		*(uint8_t*)p->ref = value;
+		*(uint8_t*)p->reference = value;
 		break;
 	case 2:
-		*(uint16_t*)p->ref = value;
+		*(uint16_t*)p->reference = value;
 		break;
 	case 4:
-		*(uint32_t*)p->ref = value;
+		*(uint32_t*)p->reference = value;
 		break;
 	}
 }
