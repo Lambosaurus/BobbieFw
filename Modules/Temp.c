@@ -38,17 +38,24 @@ void TEMP_Init(void)
 	gState.temp = 0;
 }
 
+void TEMP_Deinit(void)
+{
+}
+
 void TEMP_Update(State_t state)
 {
-	gState.temp = NTC_10K(ADC_Read( NTC_AIN ));
-
-	int16_t threshold = gCfg.tempLimit * 10;
-	if (gState.overtemp) { threshold += OVERTEMP_HYSTERESIS; }
-
-	gState.overtemp = gState.temp > threshold;
-	if (gState.overtemp)
+	if (state != State_Sleep)
 	{
-		ERR_Set(ERR_Overtemp);
+		gState.temp = NTC_10K(ADC_Read( NTC_AIN ));
+
+		int16_t threshold = gCfg.tempLimit * 10;
+		if (gState.overtemp) { threshold += OVERTEMP_HYSTERESIS; }
+
+		gState.overtemp = gState.temp > threshold;
+		if (gState.overtemp)
+		{
+			ERR_Set(ERR_Overtemp);
+		}
 	}
 }
 

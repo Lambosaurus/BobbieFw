@@ -7,6 +7,7 @@
 #include "LED.h"
 
 void BLINK_Init(void);
+void BLINK_Deinit(void);
 void BLINK_Update(State_t state);
 void BLINK_Start(Color_t color, uint16_t period, uint8_t blinks);
 

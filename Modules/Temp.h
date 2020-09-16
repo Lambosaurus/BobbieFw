@@ -7,6 +7,7 @@
 
 
 void TEMP_Init(void);
+void TEMP_Deinit(void);
 void TEMP_Update(State_t state);
 
 

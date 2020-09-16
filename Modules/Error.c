@@ -48,7 +48,7 @@ void ERR_Update(State_t state)
 {
 	if (gState.error != ERR_None && gCfg.errorCooldown != 0)
 	{
-		if (HAL_GetTick() - gState.lastError > (gCfg.errorCooldown * 100))
+		if (HAL_GetTick() - gState.lastError > gCfg.errorCooldown)
 		{
 			ERR_Clear();
 		}

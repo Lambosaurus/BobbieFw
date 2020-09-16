@@ -19,6 +19,8 @@ typedef enum {
 	Config_ActiveTimeout,
 	Config_SerialBridge,
 	Config_TempLimit,
+	Config_FeedbackIdleInterval,
+	Config_FeedbackActiveInterval,
 } ConfigEnum_t;
 
 typedef enum {
@@ -32,12 +34,14 @@ typedef struct {
 	uint16_t version;
 	uint8_t address;
 	uint8_t ledAlpha;			// 0 - 255
-	uint8_t errorCooldown;		// 100ms steps
-	uint8_t activeTimeout; 		// 100ms steps
+	uint16_t errorCooldown;		// ms
+	uint16_t activeTimeout; 	// ms
 #ifdef SER_USE_BRIDGE
 	uint8_t serialBridge;
 #endif
 	uint8_t tempLimit;
+	uint16_t fbkIdleInterval;   // ms
+	uint16_t fbkActiveInterval; // ms
 } __attribute__((aligned(4))) Config_t;
 
 extern Config_t gCfg;

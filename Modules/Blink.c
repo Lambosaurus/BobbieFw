@@ -38,6 +38,11 @@ void BLINK_Init(void)
 	gState.blinks = 0;
 }
 
+void BLINK_Deinit(void)
+{
+	LED_Deinit();
+}
+
 void BLINK_Update(State_t state)
 {
 	Color_t color;

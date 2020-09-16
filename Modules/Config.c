@@ -9,7 +9,7 @@
  * PRIVATE DEFINITIONS
  */
 
-#define CONFIG_VERSION 0x0004
+#define CONFIG_VERSION 0x0005
 
 /*
  * PRIVATE TYPES
@@ -55,6 +55,8 @@ void CFG_Default(void)
 		.serialBridge = SerialBridge_None,
 #endif
 		.tempLimit = 80,
+		.fbkIdleInterval = 20,
+		.fbkActiveInterval = 5,
 	};
 	memcpy(&gCfg, &cfg, sizeof(gCfg));
 }
@@ -82,6 +84,12 @@ bool CFG_Get(ConfigEnum_t en, uint32_t * value)
 #endif
 	case Config_TempLimit:
 		*value = gCfg.tempLimit;
+		return true;
+	case Config_FeedbackIdleInterval:
+		*value = gCfg.fbkIdleInterval;
+		return true;
+	case Config_FeedbackActiveInterval:
+		*value = gCfg.fbkActiveInterval;
 		return true;
 	}
 	return false;
@@ -122,6 +130,12 @@ bool CFG_Set(ConfigEnum_t en, uint32_t value)
 #endif
 	case Config_TempLimit:
 		gCfg.tempLimit = value;
+		return true;
+	case Config_FeedbackIdleInterval:
+		gCfg.fbkIdleInterval = value;
+		return true;
+	case Config_FeedbackActiveInterval:
+		gCfg.fbkActiveInterval = value;
 		return true;
 	}
 	return false;

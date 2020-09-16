@@ -33,7 +33,7 @@ static bool BUS_RxMsg(Msg_t * msg);
 
 static struct {
 	uint32_t lastBusStatus;
-} gStatus = { 0 };
+} gStatus;
 
 /*
  * PUBLIC FUNCTIONS
@@ -42,6 +42,7 @@ static struct {
 void BUS_Init()
 {
 	CAN_Init();
+	gStatus.lastBusStatus = HAL_GetTick();
 }
 
 void BUS_Deinit()
