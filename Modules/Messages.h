@@ -8,12 +8,26 @@
  * PUBLIC DEFINITIONS
  */
 
-/*
- * PUBLIC TYPES
- */
+#define READ_U16(data, i)  ((data[i] << 8) | data[i+1] )
+#define READ_U32(data, i)  ((data[i] << 24) | (data[i+1] << 16) | (data[i+2] << 8) | data[i+3])
+
+#define WRITE_U32(data, i, value) do {	\
+	data[i  ] = (uint8_t)(value >> 24);	\
+	data[i+1] = (uint8_t)(value >> 16);	\
+	data[i+2] = (uint8_t)(value >> 8);	\
+	data[i+3] = (uint8_t)(value);		\
+	} while(0)
+
+#define WRITE_U16(data, i, value) do { \
+	data[i  ] = (uint8_t)(value >> 8);	\
+	data[i+1] = (uint8_t)(value);		\
+	} while(0)
 
 #define DST_BROADCAST 0
 
+/*
+ * PUBLIC TYPES
+ */
 
 typedef enum {
 	BoardType_Pwr,
@@ -28,6 +42,7 @@ typedef enum {
 	TOPIC_Config,
 	TOPIC_State,
 	TOPIC_Servo,
+	Topic_ServoFbk,
 } Topic_t;
 
 typedef enum {
@@ -44,6 +59,7 @@ typedef enum {
 	TOPIC_State_Is,
 	TOPIC_State_Blink,
 	TOPIC_State_Clear,
+	TOPIC_State_GetFeedback,
 } Topic_State_t;
 
 typedef struct {

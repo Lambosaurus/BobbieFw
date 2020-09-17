@@ -1,6 +1,8 @@
 
 #include "State.h"
 #include "Config.h"
+#include "Messages.h"
+#include "Error.h"
 
 /*
  * PRIVATE DEFINITIONS
@@ -79,6 +81,17 @@ State_t State_Last(void)
 	return gState.state;
 }
 
+void State_Send(uint8_t dest)
+{
+	Error_t err = ERR_Get();
+	uint8_t data[5] = {
+			TOPIC_State_Is,
+			BOARD_TYPE,
+			State_Last(),
+	};
+	WRITE_U16(data, 3, err);
+	MSG_Send(TOPIC_State, data, sizeof(data), dest);
+}
 
 /*
  * PRIVATE FUNCTIONS

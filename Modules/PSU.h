@@ -19,6 +19,6 @@
 void PSU_Init(void);
 void PSU_Deinit(void);
 void PSU_Update(State_t state);
-uint32_t PSU_GetVoltage(void);
+uint16_t PSU_GetVoltage(void);
 
 #endif //PSU_H

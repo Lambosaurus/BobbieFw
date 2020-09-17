@@ -17,4 +17,6 @@ State_t State_Update(void);
 void State_Reset(void);
 State_t State_Last(void);
 
+void State_Send(uint8_t dest);
+
 #endif /* STATE_H */

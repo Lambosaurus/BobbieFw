@@ -9,6 +9,7 @@
 #include "Serial.h"
 #include "Blink.h"
 #include "Temp.h"
+#include "Feedback.h"
 
 #ifdef USE_PSU
 #include "PSU.h"
@@ -66,7 +67,7 @@ int main(void)
 #endif
 		ERR_Update(state);
 		SER_Update(state);
-
+		FBK_Update(state);
 
 		BLINK_Update(state);
 

@@ -20,4 +20,6 @@ void FBK_Init(void);
 void FBK_Deinit(void);
 void FBK_Update(State_t state);
 
+void FBK_Send(uint8_t addr);
+
 #endif //FEEDBACK_H
