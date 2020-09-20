@@ -9,8 +9,8 @@
 #define PSU_FB_AIN		ADC_CHANNEL_0
 #define PSU_FB_RLOW		10
 #define PSU_FB_RHIGH	47
-#define PSU_MV_MIN		5500
-#define PSU_MV_MAX		6500
+#define PSU_MV_MIN		4000
+#define PSU_MV_MAX		8000
 #define PSU_STARTUP_MS	200
 
 #define USE_ISENSE

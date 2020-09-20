@@ -69,7 +69,7 @@ void FBK_Send(uint8_t addr)
 	uint8_t data[6];
 	WRITE_U16(data, 0, temp);
 	WRITE_U16(data, 2, servo_i);
-	WRITE_U16(data, 6, servo_v);
+	WRITE_U16(data, 4, servo_v);
 	Topic_t topic = Topic_ServoFbk;
 #endif
 

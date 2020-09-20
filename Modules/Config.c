@@ -9,7 +9,7 @@
  * PRIVATE DEFINITIONS
  */
 
-#define CONFIG_VERSION 0x0005
+#define CONFIG_VERSION 0x0006
 
 /*
  * PRIVATE TYPES
@@ -53,6 +53,9 @@ const static ConfigParam_t gParams[] = {
 		CONFIG_PARAM(Config_ErrorCooldown, gCfg.errorCooldown, 3000, 0, 60000),
 		CONFIG_PARAM(Config_ActiveTimeout, gCfg.activeTimeout, 3000, 0, 60000),
 		CONFIG_PARAM(Config_TempLimit, gCfg.tempLimit, 80, 0, 200),
+#ifdef SER_USE_BRIDGE
+		CONFIG_PARAM(Config_SerialBridge, gCfg.serialBridge, SerialBridge_None, SerialBridge_None, SerialBridge_All),
+#endif
 		CONFIG_PARAM(Config_FeedbackIdleInterval, gCfg.fbkIdleInterval, 2000, 0, 60000),
 		CONFIG_PARAM(Config_FeedbackActiveInterval, gCfg.fbkActiveInterval, 500, 0, 60000),
 };
@@ -101,7 +104,7 @@ bool CFG_Set(ConfigEnum_t en, uint32_t value)
 	const ConfigParam_t * p = CFG_PARAM_Find(en);
 	if (p != NULL)
 	{
-		if (value < p->min || value > p->max)
+		if (value >= p->min && value <= p->max)
 		{
 			CFG_PARAM_Set(p, value);
 			return true;
