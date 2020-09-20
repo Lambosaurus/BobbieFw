@@ -26,7 +26,7 @@
 
 struct {
 	bool isEnabled;
-	uint32_t voltage;
+	uint16_t voltage;
 	uint32_t startTime;
 } gPsu;
 
@@ -82,7 +82,7 @@ void PSU_Update(State_t state)
 	}
 }
 
-uint32_t PSU_GetVoltage()
+uint16_t PSU_GetVoltage()
 {
 	return gPsu.voltage;
 }

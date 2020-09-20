@@ -39,7 +39,7 @@ void ERR_Set(Error_t err)
 	{
 		gState.error = err;
 		State_Req(State_Error);
-		MSG_SendState(DST_BROADCAST);
+		State_Send(DST_BROADCAST);
 	}
 	gState.lastError = HAL_GetTick();
 }
@@ -65,7 +65,7 @@ void ERR_Clear(void)
 	if (gState.error != ERR_None)
 	{
 		gState.error = ERR_None;
-		MSG_SendState(DST_BROADCAST);
+		State_Send(DST_BROADCAST);
 	}
 	State_Reset();
 }

@@ -9,6 +9,6 @@
 void TEMP_Init(void);
 void TEMP_Deinit(void);
 void TEMP_Update(State_t state);
-
+int16_t TEMP_Get(void);
 
 #endif /* TEMP_H */

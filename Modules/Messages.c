@@ -6,6 +6,7 @@
 #include "Blink.h"
 #include "Error.h"
 #include <string.h>
+#include "Feedback.h"
 
 #ifdef USE_SERVO
 #include "Servo.h"
@@ -14,22 +15,6 @@
 /*
  * PRIVATE DEFINITIONS
  */
-
-#define READ_U16(data, i)  ((data[i] << 8) | data[i+1] )
-#define READ_U32(data, i)  ((data[i] << 24) | (data[i+1] << 16) | (data[i+2] << 8) | data[i+3])
-
-#define WRITE_U32(data, i, value) do {	\
-	data[i  ] = (uint8_t)(value >> 24);	\
-	data[i+1] = (uint8_t)(value >> 16);	\
-	data[i+2] = (uint8_t)(value >> 8);	\
-	data[i+3] = (uint8_t)(value);		\
-	} while(0)
-
-#define WRITE_U16(data, i, value) do { \
-	data[i  ] = (uint8_t)(value >> 8);	\
-	data[i+1] = (uint8_t)(value);		\
-	} while(0)
-
 
 /*
  * PRIVATE TYPES
@@ -108,20 +93,6 @@ void MSG_SendMsg(Msg_t * msg)
 #endif
 }
 
-void MSG_SendState(uint8_t dest)
-{
-	Error_t err = ERR_Get();
-	uint8_t data[5] = {
-			TOPIC_State_Is,
-			BOARD_TYPE,
-			State_Last(),
-			0,
-			0
-	};
-	WRITE_U16(data, 3, err);
-	MSG_Send(TOPIC_State, data, sizeof(data), dest);
-}
-
 /*
  * PRIVATE VARIABLES
  */
@@ -159,7 +130,7 @@ static void MSG_HandleTopic_State(Msg_t * msg)
 		{
 		case TOPIC_State_Request:
 		{
-			MSG_SendState(msg->src);
+			State_Send(msg->src);
 			break;
 		}
 		case TOPIC_State_Blink:
@@ -176,6 +147,9 @@ static void MSG_HandleTopic_State(Msg_t * msg)
 			break;
 		case TOPIC_State_Clear:
 			ERR_Clear();
+			break;
+		case TOPIC_State_GetFeedback:
+			FBK_Send(msg->src);
 			break;
 		}
 	}
