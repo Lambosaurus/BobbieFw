@@ -3,6 +3,8 @@
 
 #define BOARD_TYPE 		BoardType_Servo
 
+#define NTC_AIN  		ADC_CHANNEL_4
+
 #define USE_PSU
 #define PSU_EN_GPIO		GPIOC
 #define PSU_EN_PIN		GPIO_PIN_13

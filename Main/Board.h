@@ -30,7 +30,6 @@ extern "C" {
 #define CAN_GPIO		GPIOB
 #define CAN_PINS		(GPIO_PIN_8 | GPIO_PIN_9)
 
-#define NTC_AIN  		ADC_CHANNEL_4
 
 
 #ifdef BRD_SERVO

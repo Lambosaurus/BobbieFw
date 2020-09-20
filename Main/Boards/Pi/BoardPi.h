@@ -3,6 +3,8 @@
 
 #define BOARD_TYPE 		BoardType_Pi
 
+#define NTC_AIN  		ADC_CHANNEL_1
+
 // WARN: THIS IS WRONG FOR V1 BOARDS
 #define BUTTON_GPIO		GPIOB
 #define BUTTON_PIN		GPIO_PIN_3
