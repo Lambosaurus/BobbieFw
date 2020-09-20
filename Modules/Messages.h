@@ -43,6 +43,7 @@ typedef enum {
 	TOPIC_State,
 	TOPIC_Servo,
 	Topic_ServoFbk,
+	Topic_PiFbk,
 } Topic_t;
 
 typedef enum {

@@ -72,6 +72,13 @@ void FBK_Send(uint8_t addr)
 	WRITE_U16(data, 4, servo_v);
 	Topic_t topic = Topic_ServoFbk;
 #endif
+#ifdef BRD_PI
+	uint16_t pi_v = PSU_GetVoltage();
+	uint8_t data[4];
+	WRITE_U16(data, 0, temp);
+	WRITE_U16(data, 2, pi_v);
+	Topic_t topic = Topic_PiFbk;
+#endif
 
 	MSG_Send(topic, data, sizeof(data), addr);
 }
