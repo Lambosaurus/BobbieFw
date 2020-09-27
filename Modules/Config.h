@@ -21,6 +21,7 @@ typedef enum {
 	Config_TempLimit,
 	Config_FeedbackIdleInterval,
 	Config_FeedbackActiveInterval,
+	Config_MotorBrakeThreshold,
 } ConfigEnum_t;
 
 typedef enum {
@@ -42,6 +43,9 @@ typedef struct {
 	uint8_t tempLimit;
 	uint16_t fbkIdleInterval;   // ms
 	uint16_t fbkActiveInterval; // ms
+#ifdef USE_MOTORS
+	uint8_t motorBrakeThreshold;// 0 - 255
+#endif
 } __attribute__((aligned(4))) Config_t;
 
 extern Config_t gCfg;

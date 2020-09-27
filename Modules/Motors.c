@@ -23,6 +23,7 @@
 
 static void MOTOR_Start(void);
 static void MOTOR_Stop(void);
+static void MOTOR_Throttle(uint8_t ch, uint8_t i1, uint8_t i2);
 
 /*
  * PRIVATE VARIABLES
@@ -53,7 +54,20 @@ void MOTOR_Set(uint8_t motor, int16_t throttle)
 		bool rev = throttle < 0;
 		uint16_t duty = rev ? -throttle : throttle;
 		if (duty > MOTOR_PWM_MAX) { duty = MOTOR_PWM_MAX; }
-		bool glide = false;
+
+		bool brake = duty < gCfg.motorBrakeThreshold;
+
+		uint8_t i1 = brake ? MOTOR_PWM_MAX 			: duty;
+		uint8_t i2 = brake ? MOTOR_PWM_MAX - duty 	: 0   ;
+
+		if (rev)
+		{
+			MOTOR_Throttle(motor, i2, i1);
+		}
+		else
+		{
+			MOTOR_Throttle(motor, i1, i2);
+		}
 	}
 }
 
@@ -78,6 +92,21 @@ void MOTOR_Update(State_t state)
 /*
  * PRIVATE FUNCTIONS
  */
+
+static void MOTOR_Throttle(uint8_t ch, uint8_t i1, uint8_t i2)
+{
+	switch (ch)
+	{
+	case 0:
+		TIM_SetPulse(MOTOR0_I1_CH, i1);
+		TIM_SetPulse(MOTOR0_I2_CH, i2);
+		break;
+	case 1:
+		TIM_SetPulse(MOTOR1_I1_CH, i1);
+		TIM_SetPulse(MOTOR1_I2_CH, i2);
+		break;
+	}
+}
 
 static void MOTOR_Start(void)
 {

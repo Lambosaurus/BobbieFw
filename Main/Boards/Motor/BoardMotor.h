@@ -15,6 +15,10 @@
 #define MOTOR1_I1_PIN	GPIO_PIN_10
 #define MOTOR1_I2_PIN	GPIO_PIN_11
 #define MOTOR_GPIO_AF	GPIO_AF2_TIM1
+#define MOTOR0_I1_CH	0
+#define MOTOR0_I2_CH	1
+#define MOTOR1_I1_CH	2
+#define MOTOR1_I2_CH	3
 #define MOTOR_COUNT		2
 #define USE_TIM1
 #define MOTOR_TIM		TIM_1
