@@ -5,6 +5,8 @@
 #include "Messages.h"
 #include "Temp.h"
 
+#include "ADC.h"
+
 #ifdef USE_ISENSE
 #include "Isense.h"
 #endif
@@ -30,6 +32,10 @@
 
 static struct {
 	uint32_t lastFeedbackTime;
+
+#ifdef VBAT_AIN
+	uint16_t battVoltage;
+#endif
 } gState;
 
 /*
@@ -49,6 +55,11 @@ void FBK_Update(State_t state)
 {
 	if (state != State_Sleep)
 	{
+
+#ifdef VBAT_AIN
+		gState.battVoltage = AIN_ToMv(ADC_Read(VBAT_AIN), VBAT_RLOW, VBAT_RHIGH);
+#endif
+
 		uint32_t interval = state == State_Active ? gCfg.fbkActiveInterval : gCfg.fbkIdleInterval;
 		uint32_t now = HAL_GetTick();
 		if (interval > 0 && now - gState.lastFeedbackTime >= interval)
@@ -58,6 +69,13 @@ void FBK_Update(State_t state)
 		}
 	}
 }
+
+#ifdef VBAT_AIN
+uint16_t FBK_GetBattVoltage(void)
+{
+	return gState.battVoltage;
+}
+#endif
 
 void FBK_Send(uint8_t addr)
 {
@@ -78,6 +96,11 @@ void FBK_Send(uint8_t addr)
 	WRITE_U16(data, 0, temp);
 	WRITE_U16(data, 2, pi_v);
 	Topic_t topic = Topic_PiFbk;
+#endif
+#ifdef BRD_MOTOR
+	uint8_t data[2];
+	WRITE_U16(data, 0, temp);
+	Topic_t topic = Topic_MotorFbk;
 #endif
 
 	MSG_Send(topic, data, sizeof(data), addr);

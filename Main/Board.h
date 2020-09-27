@@ -10,9 +10,10 @@ extern "C" {
 #include "stdbool.h"
 
 
-//#define BRD_PI
-#define BRD_SERVO
 //#define BRD_PWR
+//#define BRD_PI
+//#define BRD_SERVO
+#define BRD_MOTOR
 //#define IS_BUSMASTER
 
 #define CORE_USE_HSE

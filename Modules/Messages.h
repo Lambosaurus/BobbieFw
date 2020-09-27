@@ -44,6 +44,7 @@ typedef enum {
 	TOPIC_Servo,
 	Topic_ServoFbk,
 	Topic_PiFbk,
+	Topic_MotorFbk,
 } Topic_t;
 
 typedef enum {

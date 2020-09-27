@@ -20,11 +20,13 @@
 #ifdef USE_ISENSE
 #include "ISense.h"
 #endif
+#ifdef USE_MOTORS
+#include "Motors.h"
+#endif
 
 
 int main(void)
 {
-
 	CORE_Init();
 	CFG_Load();
 
@@ -43,6 +45,9 @@ int main(void)
 #endif
 #ifdef USE_ISENSE
 	ISENSE_Init();
+#endif
+#ifdef USE_MOTORS
+	MOTOR_Init();
 #endif
 	BUS_Init();
 	SER_Init();
@@ -64,6 +69,9 @@ int main(void)
 #endif
 #ifdef USE_ISENSE
 		ISENSE_Update(state);
+#endif
+#ifdef USE_MOTORS
+		MOTOR_Update(state);
 #endif
 		ERR_Update(state);
 		SER_Update(state);

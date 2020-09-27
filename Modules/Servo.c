@@ -4,7 +4,6 @@
 #ifdef SERVO_COUNT
 
 #include "TIM.h"
-#include "LED.h"
 #include "GPIO.h"
 
 /*
