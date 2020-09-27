@@ -10,6 +10,9 @@
  * PRIVATE DEFINITIONS
  */
 
+#define MOTOR_PINS_ALL	(MOTOR0_I1_PIN | MOTOR0_I2_PIN | MOTOR1_I1_PIN | MOTOR1_I2_PIN)
+#define MOTOR_PWM_MAX	255
+
 /*
  * PRIVATE TYPES
  */
@@ -25,10 +28,6 @@ static void MOTOR_Stop(void);
  * PRIVATE VARIABLES
  */
 
-typedef struct {
-	int16_t throttle;
-} Motor_t;
-
 static struct {
 	bool enabled;
 	Motor_t motors[MOTOR_COUNT];
@@ -40,29 +39,21 @@ static struct {
 
 void MOTOR_Init(void)
 {
-	GPIO_InitTypeDef init = {
-			.Mode = GPIO_MODE_OUTPUT_PP,
-			.Pull = GPIO_NOPULL,
-			.Speed = GPIO_SPEED_FREQ_HIGH,
-	};
-	init.Pin = MOTOR0_I1_PIN | MOTOR0_I2_PIN;
-	HAL_GPIO_Init(MOTOR_GPIO, &init);
-	init.Pin = MOTOR1_I1_PIN | MOTOR1_I2_PIN;
-	HAL_GPIO_Init(MOTOR_GPIO, &init);
-
 	gMotors.enabled = false;
 }
 
 void MOTOR_Deinit(void)
 {
-	HAL_GPIO_DeInit(MOTOR_GPIO, MOTOR0_I1_PIN | MOTOR0_I2_PIN);
-	HAL_GPIO_DeInit(MOTOR_GPIO, MOTOR1_I1_PIN | MOTOR1_I2_PIN);
 }
 
 void MOTOR_Set(uint8_t motor, int16_t throttle)
 {
 	if (motor < MOTOR_COUNT)
 	{
+		bool rev = throttle < 0;
+		uint16_t duty = rev ? -throttle : throttle;
+		if (duty > MOTOR_PWM_MAX) { duty = MOTOR_PWM_MAX; }
+		bool glide = false;
 	}
 }
 
@@ -81,29 +72,6 @@ void MOTOR_Update(State_t state)
 			MOTOR_Stop();
 		}
 	}
-	else
-	{
-		static bool once = true;
-		if (once)
-		{
-			once = false;
-			GPIO_RESET(MOTOR_GPIO, MOTOR0_I1_PIN);
-
-			GPIO_InitTypeDef init = {
-					.Pin = MOTOR0_I2_PIN,
-					.Pull = GPIO_NOPULL,
-					.Speed = GPIO_SPEED_FREQ_HIGH,
-					.Mode = GPIO_MODE_AF_PP,
-					.Alternate = GPIO_AF2_TIM1,
-			};
-			HAL_GPIO_Init(MOTOR_GPIO, &init);
-
-			TIM_Init(TIM_1, 5000 * 255,  255);
-			TIM_EnablePwm(TIM_1, 1);
-			TIM_SetPulse(TIM_1, 1, 0);
-			TIM_Start(TIM_1);
-		}
-	}
 }
 
 
@@ -113,10 +81,30 @@ void MOTOR_Update(State_t state)
 
 static void MOTOR_Start(void)
 {
+	TIM_Init(MOTOR_TIM, MOTOR_FREQ * MOTOR_PWM_MAX, MOTOR_PWM_MAX);
+	for (int ch = 0; ch < 4; ch++)
+	{
+		TIM_EnablePwm(MOTOR_TIM, ch);
+		TIM_SetPulse(MOTOR_TIM, ch, 0);
+	}
+
+	GPIO_InitTypeDef init = {
+			.Pin = MOTOR_PINS_ALL,
+			.Pull = GPIO_NOPULL,
+			.Speed = GPIO_SPEED_FREQ_HIGH,
+			.Mode = GPIO_MODE_AF_PP,
+			.Alternate = MOTOR_GPIO_AF,
+	};
+	HAL_GPIO_Init(MOTOR_GPIO, &init);
+
+	TIM_Start(MOTOR_TIM);
 }
 
 static void MOTOR_Stop(void)
 {
+	TIM_Stop(MOTOR_TIM);
+	HAL_GPIO_Deinit(MOTOR_GPIO, MOTOR_PINS_ALL);
+	TIM_Deinit(MOTOR_TIM);
 }
 
 /*
