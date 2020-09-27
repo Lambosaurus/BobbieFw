@@ -5,6 +5,7 @@
 
 #include "TIM.h"
 #include "GPIO.h"
+#include "Config.h"
 
 /*
  * PRIVATE DEFINITIONS
@@ -31,7 +32,6 @@ static void MOTOR_Throttle(uint8_t ch, uint8_t i1, uint8_t i2);
 
 static struct {
 	bool enabled;
-	Motor_t motors[MOTOR_COUNT];
 } gMotors;
 
 /*
@@ -98,12 +98,12 @@ static void MOTOR_Throttle(uint8_t ch, uint8_t i1, uint8_t i2)
 	switch (ch)
 	{
 	case 0:
-		TIM_SetPulse(MOTOR0_I1_CH, i1);
-		TIM_SetPulse(MOTOR0_I2_CH, i2);
+		TIM_SetPulse(MOTOR_TIM, MOTOR0_I1_CH, i1);
+		TIM_SetPulse(MOTOR_TIM, MOTOR0_I2_CH, i2);
 		break;
 	case 1:
-		TIM_SetPulse(MOTOR1_I1_CH, i1);
-		TIM_SetPulse(MOTOR1_I2_CH, i2);
+		TIM_SetPulse(MOTOR_TIM, MOTOR1_I1_CH, i1);
+		TIM_SetPulse(MOTOR_TIM, MOTOR1_I2_CH, i2);
 		break;
 	}
 }
@@ -132,7 +132,7 @@ static void MOTOR_Start(void)
 static void MOTOR_Stop(void)
 {
 	TIM_Stop(MOTOR_TIM);
-	HAL_GPIO_Deinit(MOTOR_GPIO, MOTOR_PINS_ALL);
+	HAL_GPIO_DeInit(MOTOR_GPIO, MOTOR_PINS_ALL);
 	TIM_Deinit(MOTOR_TIM);
 }
 
