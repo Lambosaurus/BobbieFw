@@ -32,6 +32,8 @@ void TIM_SetPulse(TIM_t * tim, uint8_t ch, uint16_t pulse);
 void TIM_Start(TIM_t * tim);
 void TIM_Stop(TIM_t * tim);
 
+void TIM_EnablePwm(TIM_t * tim, uint8_t ch);
+
 #ifdef USE_TIM1
 extern TIM_t * TIM_1;
 #endif

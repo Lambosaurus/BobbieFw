@@ -5,6 +5,12 @@
  * PRIVATE DEFINITIONS
  */
 
+#define TIM_ENABLE_CCx(tim, cc)   	(tim->Instance->CCER |=  (TIM_CCER_CC1E << (cc*4)))
+#define TIM_DISABLE_CCx(tim, cc) 	(tim->Instance->CCER &= ~(TIM_CCER_CC1E << (cc*4)))
+
+#define TIM_CCMRx_MSK	(TIM_CCMR1_OC1M | TIM_CCMR1_CC1S | TIM_CCMR1_OC1FE | TIM_CCMR1_OC1PE)
+
+
 /*
  * PRIVATE TYPES
  */
@@ -18,7 +24,7 @@ static void TIMx_Deinit(TIM_t * tim);
 static void TIM_IRQHandler(TIM_t * tim);
 static void TIM_Reload(TIM_t * tim);
 
-static void TIM_EnableOCx(TIM_t * tim, uint8_t oc);
+static void TIM_EnableOCx(TIM_t * tim, uint8_t oc, uint32_t mode);
 
 /*
  * PRIVATE VARIABLES
@@ -92,12 +98,27 @@ void TIM_OnPulse(TIM_t * tim, uint8_t ch, VoidFunction_t callback)
 {
 	if (ch < 4)
 	{
-		TIM_EnableOCx(tim, ch);
+		TIM_EnableOCx(tim, ch, TIM_OCMODE_ACTIVE);
 		// Note that the channels IT's are 1 << 1 through 1 << 4
 		__HAL_TIM_ENABLE_IT(tim, TIM_IT_CC1 << ch);
 		tim->PulseCallback[ch] = callback;
 	}
 }
+
+void TIM_EnablePwm(TIM_t * tim, uint8_t ch)
+{
+	if (ch < 4)
+	{
+		if(IS_TIM_BREAK_INSTANCE(tim->Instance) != RESET)
+		{
+			__HAL_TIM_MOE_ENABLE(tim);
+		}
+
+		// TIM_CCMR1_OC1PE is the output compare preload
+		TIM_EnableOCx(tim, ch, TIM_OCMODE_PWM1 | TIM_CCMR1_OC1PE | TIM_OCFAST_ENABLE);
+	}
+}
+
 
 void TIM_SetPulse(TIM_t * tim, uint8_t ch, uint16_t pulse)
 {
@@ -141,37 +162,30 @@ void TIM_Deinit(TIM_t * tim)
  * PRIVATE FUNCTIONS
  */
 
-static void TIM_EnableOCx(TIM_t * tim, uint8_t oc)
+static void TIM_EnableOCx(TIM_t * tim, uint8_t oc, uint32_t mode)
 {
+	// Disable the channel during the update.
+	TIM_DISABLE_CCx(tim, oc);
 	switch (oc)
 	{
 	case 0:
-		// Disable the channel during the update.
-		tim->Instance->CCER &= ~TIM_CCER_CC1E;
-		MODIFY_REG(tim->Instance->CCMR1, TIM_CCMR1_OC1M | TIM_CCMR1_CC1S , TIM_OCMODE_ACTIVE);
+		MODIFY_REG(tim->Instance->CCMR1, TIM_CCMRx_MSK, mode);
 		MODIFY_REG(tim->Instance->CCER, TIM_CCER_CC1P, TIM_OCPOLARITY_HIGH);
-		tim->Instance->CCER |= TIM_CCER_CC1E;
 		break;
 	case 1:
-		tim->Instance->CCER &= ~TIM_CCER_CC2E;
-		MODIFY_REG(tim->Instance->CCMR1, TIM_CCMR1_OC2M | TIM_CCMR1_CC2S, TIM_OCMODE_ACTIVE << 8);
+		MODIFY_REG(tim->Instance->CCMR1, TIM_CCMRx_MSK << 8, mode << 8);
 		MODIFY_REG(tim->Instance->CCER, TIM_CCER_CC2P, TIM_OCPOLARITY_HIGH << 4);
-		tim->Instance->CCER |= TIM_CCER_CC2E;
 		break;
 	case 2:
-		tim->Instance->CCER &= ~TIM_CCER_CC3E;
-		MODIFY_REG(tim->Instance->CCMR2, TIM_CCMR2_OC3M | TIM_CCMR2_CC3S, TIM_OCMODE_ACTIVE);
+		MODIFY_REG(tim->Instance->CCMR2, TIM_CCMRx_MSK, mode);
 		MODIFY_REG(tim->Instance->CCER, TIM_CCER_CC3P, TIM_OCPOLARITY_HIGH << 8);
-		tim->Instance->CCER |= TIM_CCER_CC3E;
 		break;
 	case 3:
-		tim->Instance->CCER &= ~TIM_CCER_CC4E;
-		MODIFY_REG(tim->Instance->CCMR1, TIM_CCMR2_OC4M | TIM_CCMR2_CC4S, TIM_OCMODE_ACTIVE << 8);
+		MODIFY_REG(tim->Instance->CCMR2, TIM_CCMRx_MSK << 8, mode << 8);
 		MODIFY_REG(tim->Instance->CCER, TIM_CCER_CC4P, TIM_OCPOLARITY_HIGH << 12);
-		tim->Instance->CCER |= TIM_CCER_CC4E;
 		break;
 	}
-
+	TIM_ENABLE_CCx(tim, oc);
 
 	//if(IS_TIM_CCXN_INSTANCE(tim->Instance, TIM_CHANNEL_1))
 	//{
@@ -205,7 +219,7 @@ static void TIM_Reload(TIM_t * tim)
 
 static void TIMx_Init(TIM_t * tim)
 {
-#if USE_TIM1
+#ifdef USE_TIM1
 	if (tim == TIM_1)
 	{
 		HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);
@@ -254,7 +268,7 @@ static void TIMx_Init(TIM_t * tim)
 
 static void TIMx_Deinit(TIM_t * tim)
 {
-#if USE_TIM1
+#ifdef USE_TIM1
 	if (tim == TIM_1)
 	{
 		HAL_NVIC_DisableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);
@@ -333,7 +347,7 @@ static void TIM_IRQHandler(TIM_t * tim)
 	}
 }
 
-#if USE_TIM1
+#ifdef USE_TIM1
 void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
 {
 	TIM_IRQHandler(TIM_1);
