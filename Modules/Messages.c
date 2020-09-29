@@ -11,6 +11,9 @@
 #ifdef USE_SERVO
 #include "Servo.h"
 #endif
+#ifdef USE_MOTORS
+#include "Motors.h"
+#endif
 
 /*
  * PRIVATE DEFINITIONS
@@ -30,6 +33,9 @@ static void MSG_HandleTopic(Msg_t * msg);
 
 #ifdef USE_SERVO
 static void MSG_HandleTopic_Servo(Msg_t * msg);
+#endif
+#ifdef USE_MOTORS
+static void MSG_HandleTopic_Motor(Msg_t * msg);
 #endif
 
 /*
@@ -115,6 +121,11 @@ static void MSG_HandleTopic(Msg_t * msg)
 #ifdef USE_SERVO
 	case TOPIC_Servo:
 		MSG_HandleTopic_Servo(msg);
+		break;
+#endif
+#ifdef USE_MOTORS
+	case Topic_Motor:
+		MSG_HandleTopic_Motor(msg);
 		break;
 #endif
 	default:
@@ -211,10 +222,23 @@ static void MSG_HandleTopic_Servo(Msg_t * msg)
 			SERVO_Set(s, v);
 		}
 	}
-
 }
 #endif
 
+#ifdef USE_MOTORS
+static void MSG_HandleTopic_Motor(Msg_t * msg)
+{
+	if ( msg->len >= (MOTOR_COUNT*2) && State_Req(State_Active))
+	{
+		for (int i = 0; i < MOTOR_COUNT; i++)
+		{
+			int k = i * 2;
+			int16_t t = READ_U16(msg->data, k);
+			MOTOR_Set(i, t);
+		}
+	}
+}
+#endif
 
 /*
  * PUBLIC FUNCTIONS

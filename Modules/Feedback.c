@@ -98,8 +98,14 @@ void FBK_Send(uint8_t addr)
 	Topic_t topic = Topic_PiFbk;
 #endif
 #ifdef BRD_MOTOR
-	uint8_t data[2];
+	uint16_t motor1_i = ISENSE_Read(0);
+	uint16_t motor2_i = ISENSE_Read(1);
+	uint16_t batt_v = FBK_GetBattVoltage();
+	uint8_t data[8];
 	WRITE_U16(data, 0, temp);
+	WRITE_U16(data, 2, batt_v);
+	WRITE_U16(data, 4, motor1_i);
+	WRITE_U16(data, 6, motor2_i);
 	Topic_t topic = Topic_MotorFbk;
 #endif
 

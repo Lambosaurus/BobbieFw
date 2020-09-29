@@ -158,10 +158,14 @@ static void MOTOR_Start(void)
 		gMotors.motors[i].throttle = 1;
 		gMotors.motors[i].requested = 0;
 	}
+
+	gMotors.enabled = true;
 }
 
 static void MOTOR_Stop(void)
 {
+	gMotors.enabled = false;
+
 	TIM_Stop(MOTOR_TIM);
 	HAL_GPIO_DeInit(MOTOR_GPIO, MOTOR_PINS_ALL);
 	TIM_Deinit(MOTOR_TIM);
