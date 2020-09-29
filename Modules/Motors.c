@@ -18,13 +18,19 @@
  * PRIVATE TYPES
  */
 
+typedef struct {
+	int16_t throttle;
+	int16_t requested;
+} Motor_t;
+
 /*
  * PRIVATE PROTOTYPES
  */
 
 static void MOTOR_Start(void);
 static void MOTOR_Stop(void);
-static void MOTOR_Throttle(uint8_t ch, uint8_t i1, uint8_t i2);
+static void MOTOR_SetThrottle(uint8_t ch, uint8_t i1, uint8_t i2);
+static void MOTOR_UpdateThrottle(uint8_t ch, int16_t throttle);
 
 /*
  * PRIVATE VARIABLES
@@ -32,6 +38,7 @@ static void MOTOR_Throttle(uint8_t ch, uint8_t i1, uint8_t i2);
 
 static struct {
 	bool enabled;
+	Motor_t motors[MOTOR_COUNT];
 } gMotors;
 
 /*
@@ -47,27 +54,11 @@ void MOTOR_Deinit(void)
 {
 }
 
-void MOTOR_Set(uint8_t motor, int16_t throttle)
+void MOTOR_Set(uint8_t ch, int16_t throttle)
 {
-	if (motor < MOTOR_COUNT)
+	if (ch < MOTOR_COUNT)
 	{
-		bool rev = throttle < 0;
-		uint16_t duty = rev ? -throttle : throttle;
-		if (duty > MOTOR_PWM_MAX) { duty = MOTOR_PWM_MAX; }
-
-		bool brake = duty < gCfg.motorBrakeThreshold;
-
-		uint8_t i1 = brake ? MOTOR_PWM_MAX 			: duty;
-		uint8_t i2 = brake ? MOTOR_PWM_MAX - duty 	: 0   ;
-
-		if (rev)
-		{
-			MOTOR_Throttle(motor, i2, i1);
-		}
-		else
-		{
-			MOTOR_Throttle(motor, i1, i2);
-		}
+		gMotors.motors[ch].requested = throttle;
 	}
 }
 
@@ -86,6 +77,19 @@ void MOTOR_Update(State_t state)
 			MOTOR_Stop();
 		}
 	}
+
+	if (gMotors.enabled)
+	{
+		for (int i = 0; i < MOTOR_COUNT; i++)
+		{
+			Motor_t * m = gMotors.motors + i;
+			if (m->throttle != m->requested)
+			{
+				m->throttle = m->requested;
+				MOTOR_UpdateThrottle(i, m->throttle);
+			}
+		}
+	}
 }
 
 
@@ -93,7 +97,28 @@ void MOTOR_Update(State_t state)
  * PRIVATE FUNCTIONS
  */
 
-static void MOTOR_Throttle(uint8_t ch, uint8_t i1, uint8_t i2)
+static void MOTOR_UpdateThrottle(uint8_t ch, int16_t throttle)
+{
+	bool rev = throttle < 0;
+	uint16_t duty = rev ? -throttle : throttle;
+	if (duty > MOTOR_PWM_MAX) { duty = MOTOR_PWM_MAX; }
+
+	bool brake = duty < gCfg.motorBrakeThreshold;
+
+	uint8_t i1 = brake ? MOTOR_PWM_MAX 			: duty;
+	uint8_t i2 = brake ? MOTOR_PWM_MAX - duty 	: 0   ;
+
+	if (rev)
+	{
+		MOTOR_SetThrottle(ch, i2, i1);
+	}
+	else
+	{
+		MOTOR_SetThrottle(ch, i1, i2);
+	}
+}
+
+static void MOTOR_SetThrottle(uint8_t ch, uint8_t i1, uint8_t i2)
 {
 	switch (ch)
 	{
@@ -127,6 +152,12 @@ static void MOTOR_Start(void)
 	HAL_GPIO_Init(MOTOR_GPIO, &init);
 
 	TIM_Start(MOTOR_TIM);
+
+	for (int i = 0; i < MOTOR_COUNT; i++)
+	{
+		gMotors.motors[i].throttle = 1;
+		gMotors.motors[i].requested = 0;
+	}
 }
 
 static void MOTOR_Stop(void)
