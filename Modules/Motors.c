@@ -104,7 +104,7 @@ static void MOTOR_UpdateThrottle(uint8_t ch, int16_t throttle)
 	if (duty > MOTOR_PWM_MAX) { duty = MOTOR_PWM_MAX; }
 
 	uint8_t i1 = MOTOR_PWM_MAX;
-	uint8_t i2 = MOTOR_PWM_MAX - duty;
+	uint8_t i2 = MOTOR_PWM_MAX;
 
 	if (rev)
 	{
