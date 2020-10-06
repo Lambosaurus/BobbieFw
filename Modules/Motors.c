@@ -103,19 +103,19 @@ static void MOTOR_UpdateThrottle(uint8_t ch, int16_t throttle)
 	uint16_t duty = rev ? -throttle : throttle;
 	if (duty > MOTOR_PWM_MAX) { duty = MOTOR_PWM_MAX; }
 
-	bool brake = duty < gCfg.motorBrakeThreshold;
-
-	uint8_t i1 = brake ? MOTOR_PWM_MAX 			: duty;
-	uint8_t i2 = brake ? MOTOR_PWM_MAX - duty 	: 0   ;
+	uint8_t i1 = MOTOR_PWM_MAX;
+	uint8_t i2 = MOTOR_PWM_MAX - duty;
 
 	if (rev)
 	{
-		MOTOR_SetThrottle(ch, i2, i1);
+		i1 -= duty;
 	}
 	else
 	{
-		MOTOR_SetThrottle(ch, i1, i2);
+		i2 -= duty;
 	}
+
+	MOTOR_SetThrottle(ch, i1, i2);
 }
 
 static void MOTOR_SetThrottle(uint8_t ch, uint8_t i1, uint8_t i2)

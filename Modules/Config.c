@@ -9,7 +9,7 @@
  * PRIVATE DEFINITIONS
  */
 
-#define CONFIG_VERSION 0x0007
+#define CONFIG_VERSION 0x0008
 
 /*
  * PRIVATE TYPES
@@ -58,9 +58,6 @@ const static ConfigParam_t gParams[] = {
 #endif
 		CONFIG_PARAM(Config_FeedbackIdleInterval, gCfg.fbkIdleInterval, 2000, 0, 60000),
 		CONFIG_PARAM(Config_FeedbackActiveInterval, gCfg.fbkActiveInterval, 500, 0, 60000),
-#ifdef USE_MOTORS
-		CONFIG_PARAM(Config_MotorBrakeThreshold, gCfg.motorBrakeThreshold, 192, 0, 255),
-#endif
 };
 
 /*
