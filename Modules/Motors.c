@@ -13,6 +13,7 @@
 
 #define MOTOR_PINS_ALL	(MOTOR0_I1_PIN | MOTOR0_I2_PIN | MOTOR1_I1_PIN | MOTOR1_I2_PIN)
 #define MOTOR_PWM_MAX	255
+#define MOTOR_PWM_RES	(MOTOR_PWM_MAX-1)
 
 /*
  * PRIVATE TYPES
@@ -135,7 +136,7 @@ static void MOTOR_SetThrottle(uint8_t ch, uint8_t i1, uint8_t i2)
 
 static void MOTOR_Start(void)
 {
-	TIM_Init(MOTOR_TIM, MOTOR_FREQ * MOTOR_PWM_MAX, MOTOR_PWM_MAX);
+	TIM_Init(MOTOR_TIM, MOTOR_FREQ * MOTOR_PWM_RES, MOTOR_PWM_RES);
 	for (int ch = 0; ch < 4; ch++)
 	{
 		TIM_EnablePwm(MOTOR_TIM, ch);
